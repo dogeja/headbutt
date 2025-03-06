@@ -1,6 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
+import { ThemeProvider } from "@/components/features/theme-provider";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -28,11 +30,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang='ko' suppressHydrationWarning>
-      <body className={inter.className}>
-        <div className='relative min-h-screen flex flex-col'>
-          <Header />
-          <main className='flex-1'>{children}</main>
-        </div>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+          <div className='relative min-h-screen flex flex-col'>
+            <Header />
+            <main className='flex-1'>{children}</main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
