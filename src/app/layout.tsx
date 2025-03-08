@@ -4,6 +4,7 @@ import "@/styles/index.css";
 import { Header } from "@/components/layout/header";
 import { Navigation } from "@/components/layout/Navigation";
 import { Toolbar } from "@/components/layout/Toolbar";
+import { Footer } from "@/components/layout/Footer";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -21,8 +22,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HeadButt - 90s Style",
-  description: "90년대 스타일의 웹사이트",
+  title: "카이로스",
+  description: "순간을 놓치지 않게",
 };
 
 export default function RootLayout({
@@ -39,7 +40,7 @@ export default function RootLayout({
           {/* 메인 윈도우 */}
           <div className='window'>
             <div className='window-header'>
-              <span>HeadButt Explorer</span>
+              <span>Explorer</span>
               <div className='window-controls'>
                 <button className='window-control'>─</button>
                 <button className='window-control'>□</button>
@@ -53,10 +54,8 @@ export default function RootLayout({
             </div>
           </div>
 
-          {/* 상태 표시줄 */}
-          <div className='statusbar'>
-            <span>Ready</span>
-          </div>
+          {/* Footer */}
+          <Footer />
         </div>
         <Toolbar />
       </body>
