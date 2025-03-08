@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/features/theme-toggle"; // 추가
 
 export function Header() {
   return (
@@ -19,7 +17,6 @@ export function Header() {
               >
                 소개
               </Link>
-
               <Link
                 href='/work'
                 className='text-sm font-medium transition-colors hover:text-primary'
@@ -36,13 +33,18 @@ export function Header() {
           </div>
 
           <div className='flex items-center gap-4'>
-            <ThemeToggle></ThemeToggle>
-            <Button variant='outline' size='sm' asChild>
-              <Link href='/login'>로그인</Link>
-            </Button>
-            <Button size='sm' asChild className='hidden md:flex'>
-              <Link href='/signup'>회원가입</Link>
-            </Button>
+            <Link
+              href='/login'
+              className='text-sm font-medium px-4 py-2 border rounded-md hover:bg-gray-100'
+            >
+              로그인
+            </Link>
+            <Link
+              href='/signup'
+              className='text-sm font-medium px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 hidden md:inline-flex'
+            >
+              회원가입
+            </Link>
           </div>
         </div>
       </div>

@@ -1,0 +1,78 @@
+@import "./variables.css";
+
+.blink {
+  animation: blink-animation 1s steps(2, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+.marquee {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* 브루탈리즘 애니메이션 */
+@keyframes brutal-shake {
+  0%,
+  100% {
+    transform: rotate(var(--brutal-rotation));
+  }
+  25% {
+    transform: rotate(calc(var(--brutal-rotation) * -1));
+  }
+  50% {
+    transform: rotate(var(--brutal-rotation));
+  }
+  75% {
+    transform: rotate(calc(var(--brutal-rotation) * -1));
+  }
+}
+
+@keyframes brutal-pop {
+  0% {
+    transform: scale(1) rotate(var(--brutal-rotation));
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+  }
+  100% {
+    transform: scale(1) rotate(var(--brutal-rotation));
+  }
+}
+
+.brutal-animate-shake {
+  animation: brutal-shake 0.5s ease-in-out;
+}
+
+.brutal-animate-pop {
+  animation: brutal-pop 0.3s ease-in-out;
+}
+
+.brutal-hover-shake:hover {
+  animation: brutal-shake 0.5s ease-in-out;
+}
+
+.brutal-hover-pop:hover {
+  animation: brutal-pop 0.3s ease-in-out;
+}

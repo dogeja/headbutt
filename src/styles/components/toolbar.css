@@ -1,0 +1,70 @@
+.toolbar {
+  position: fixed;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.toolbar-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.toolbar-button:hover {
+  background: var(--bg-hover);
+  transform: scale(1.05);
+}
+
+.toolbar-separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.25rem 0;
+}
+
+/* 다크 모드 스타일 */
+[data-theme="dark"] .toolbar {
+  background: var(--bg-secondary-dark);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .toolbar-button {
+  background: var(--bg-primary-dark);
+  color: var(--text-primary-dark);
+}
+
+[data-theme="dark"] .toolbar-button:hover {
+  background: var(--bg-hover-dark);
+}
+
+[data-theme="dark"] .toolbar-separator {
+  background: var(--border-color-dark);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .toolbar {
+    bottom: 1rem;
+    right: 1rem;
+    top: auto;
+    transform: none;
+    flex-direction: row;
+  }
+}

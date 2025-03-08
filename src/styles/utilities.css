@@ -1,0 +1,41 @@
+@import "./variables.css";
+
+.centered {
+  text-align: center;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.text-red {
+  color: #ff0000;
+}
+
+.text-blue {
+  color: #0000ff;
+}
+
+.counter {
+  font-family: var(--mono-font);
+  font-size: 10px;
+  color: #006400;
+}
+
+.hidden {
+  display: none;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 8px 0;
+}
+
+.shadow {
+  text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.5);
+}

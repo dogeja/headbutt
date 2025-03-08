@@ -1,0 +1,39 @@
+@import "./variables.css";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+  font-family: var(--system-font);
+  font-size: 12px;
+  line-height: 1.2;
+  margin: 0;
+  padding: 10px;
+  cursor: default;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+a:visited {
+  color: var(--visited-link);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+img {
+  image-rendering: pixelated;
+  border: 0;
+}
+
+hr {
+  border: 1px solid var(--border-color);
+  margin: 10px 0;
+}

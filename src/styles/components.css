@@ -1,0 +1,284 @@
+@import "./variables.css";
+
+.button {
+  background-color: var(--primary-bg);
+  border: 2px outset #ffffff;
+  color: var(--primary-text);
+  padding: 4px 8px;
+  font-family: var(--system-font);
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.button:active {
+  border: 2px inset #ffffff;
+}
+
+.input {
+  border: 2px inset #ffffff;
+  background-color: white;
+  padding: 2px 4px;
+  font-family: var(--system-font);
+  font-size: 12px;
+}
+
+.select {
+  border: 2px inset #ffffff;
+  background-color: white;
+  padding: 1px;
+  font-family: var(--system-font);
+  font-size: 12px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: white;
+}
+
+.table th {
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  text-align: left;
+  padding: 4px;
+}
+
+.table td {
+  border: 1px solid var(--border-color);
+  padding: 4px;
+}
+
+.toolbar {
+  background-color: var(--primary-bg);
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid transparent;
+  text-align: center;
+  line-height: 22px;
+  margin-right: 1px;
+}
+
+.toolbar-button:hover {
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+}
+
+.toolbar-button:active {
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 16px;
+  background-color: #808080;
+  margin: 0 4px;
+}
+
+.statusbar {
+  background-color: var(--primary-bg);
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.listview {
+  border: 2px inset #ffffff;
+  background-color: white;
+  padding: 2px;
+  height: 150px;
+  overflow-y: auto;
+}
+
+.listview-item {
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.listview-item:hover {
+  background-color: #e0e0e0;
+}
+
+.listview-item.selected {
+  background-color: #000080;
+  color: white;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: -1px;
+}
+
+.tab {
+  padding: 3px 8px;
+  background-color: var(--secondary-bg);
+  border: 2px outset #ffffff;
+  border-bottom: none;
+  margin-right: 2px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background-color: var(--primary-bg);
+  border: 2px outset #ffffff;
+  border-bottom: 2px solid var(--primary-bg);
+  z-index: 1;
+}
+
+.tab-content {
+  border: 2px outset #ffffff;
+  background-color: var(--primary-bg);
+  padding: 8px;
+}
+
+/* 브루탈리즘 컴포넌트 */
+.brutal-window {
+  background: var(--brutal-white);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  transform: rotate(var(--brutal-rotation));
+  transition: transform 0.2s ease;
+  margin: var(--brutal-spacing);
+}
+
+.brutal-window:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.brutal-window .window-header {
+  background: var(--brutal-black);
+  color: var(--brutal-white);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.brutal-button {
+  background: var(--brutal-white);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.brutal-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--brutal-black);
+}
+
+.brutal-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--brutal-black);
+}
+
+.brutal-input {
+  background: var(--brutal-white);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  padding: 0.5rem;
+  font-family: var(--mono-font);
+}
+
+.brutal-list {
+  list-style: none;
+  padding: 0;
+}
+
+.brutal-list-item {
+  background: var(--brutal-white);
+  border: var(--brutal-border);
+  margin-bottom: 1rem;
+  padding: 1rem;
+  transform: rotate(calc(var(--brutal-rotation) * -1));
+  transition: transform 0.2s ease;
+}
+
+.brutal-list-item:hover {
+  transform: rotate(0deg) translate(-2px, -2px);
+  box-shadow: var(--brutal-shadow);
+}
+
+.brutal-card {
+  background: var(--brutal-white);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  padding: 1rem;
+  margin: 1rem;
+  transform: rotate(calc(var(--brutal-rotation) * -0.5));
+}
+
+.brutal-card:hover {
+  transform: rotate(0deg) translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--brutal-black);
+}
+
+.brutal-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transform: rotate(var(--brutal-rotation));
+  display: inline-block;
+  padding: 0.5rem;
+  background: var(--brutal-yellow);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+}
+
+.brutal-alert {
+  background: var(--brutal-red);
+  color: var(--brutal-white);
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  padding: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transform: rotate(var(--brutal-rotation));
+  margin: 2rem 0;
+}
+
+/* 기존 컴포넌트에 브루탈리즘 변형 추가 */
+.window.brutal {
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  transform: rotate(var(--brutal-rotation));
+}
+
+.button.brutal {
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.listview.brutal {
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+}
+
+.table.brutal {
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  transform: rotate(calc(var(--brutal-rotation) * -0.5));
+}

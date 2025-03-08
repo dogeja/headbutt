@@ -1,0 +1,130 @@
+.feature-card {
+  border: 2px solid;
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  padding: 8px;
+  background: var(--window-bg);
+}
+
+.service-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-item {
+  background: var(--button-face);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-darker) var(--border-darker)
+    var(--border-light);
+  box-shadow: 1px 1px 0 var(--border-dark);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.menu-item:active {
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  box-shadow: -1px -1px 0 var(--border-dark);
+  padding: 5px 7px 3px 9px;
+}
+
+.info-panel {
+  border: 2px solid;
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  padding: 8px;
+  background: var(--window-bg);
+}
+
+.value-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.value-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.quote-box {
+  border: 2px solid;
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  padding: 8px;
+  margin-top: 8px;
+  text-align: center;
+  background: var(--window-bg);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .feature-card,
+  .info-panel,
+  .quote-box {
+    padding: 4px;
+  }
+
+  .menu-item {
+    padding: 8px;
+  }
+
+  .value-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-card img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.primary-button {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.primary-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.secondary-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.secondary-button:hover {
+  background-color: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+/* 다크 모드 */
+:root[class~="dark"] .feature-card,
+:root[class~="dark"] .menu-item,
+:root[class~="dark"] .info-panel {
+  background-color: var(--window-bg);
+  border: var(--inset-border);
+}
+
+:root[class~="dark"] .quote-box {
+  background-color: var(--bg-secondary);
+}

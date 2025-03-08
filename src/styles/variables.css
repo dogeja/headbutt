@@ -1,0 +1,49 @@
+:root {
+  /* 기본 색상 */
+  --primary-bg: #b8b8b8;
+  --secondary-bg: #e0e0e0;
+  --primary-text: #1a1a1a;
+  --link-color: #0066cc;
+  --visited-link: #4a1b8c;
+  --border-color: #6e6e6e;
+  --highlight-color: #008b8b;
+  --window-bg: #f0f0f0;
+
+  /* 다크모드 색상 */
+  --dark-bg: #2c2c2c;
+  --dark-secondary: #3a3a3a;
+  --dark-text: #e0e0e0;
+  --dark-border: #4a4a4a;
+
+  /* 브루탈리즘 색상 */
+  --brutal-black: #000000;
+  --brutal-white: #ffffff;
+  --brutal-red: #ff0000;
+  --brutal-blue: #0000ff;
+  --brutal-yellow: #ffff00;
+
+  /* 90년대 폰트 */
+  --system-font: "MS Sans Serif", "Arial", sans-serif;
+  --mono-font: "Courier New", monospace;
+
+  /* 테두리와 그림자 */
+  --window-border: 2px solid var(--border-color);
+  --inset-border: inset 2px var(--border-color);
+  --outset-border: outset 2px var(--window-bg);
+
+  /* 브루탈리즘 효과 */
+  --brutal-shadow: 4px 4px 0 var(--brutal-black);
+  --brutal-shadow-white: 4px 4px 0 var(--brutal-white);
+  --brutal-border: 2px solid var(--brutal-black);
+  --brutal-spacing: 1rem;
+  --brutal-rotation: -2deg;
+}
+
+/* 다크모드 */
+[data-theme="dark"] {
+  --primary-bg: var(--dark-bg);
+  --secondary-bg: var(--dark-secondary);
+  --primary-text: var(--dark-text);
+  --border-color: var(--dark-border);
+  --window-bg: var(--dark-secondary);
+}

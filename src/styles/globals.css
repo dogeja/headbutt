@@ -1,0 +1,163 @@
+:root {
+  --bg-primary: #c0c0c0;
+  --text-primary: #000000;
+  --border-light: #ffffff;
+  --border-dark: #808080;
+  --border-darker: #404040;
+  --window-bg: #ffffff;
+  --window-title-bg: #000080;
+  --window-title-text: #ffffff;
+  --button-face: #c0c0c0;
+  --link-color: #0000ff;
+  --link-visited: #800080;
+}
+
+/* 기본 스타일 */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "MS Sans Serif", "Segoe UI", Tahoma, sans-serif;
+  margin: 0;
+  padding: 8px;
+}
+
+/* 윈도우 스타일 */
+.window {
+  background: var(--window-bg);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-darker) var(--border-darker)
+    var(--border-light);
+  box-shadow: 1px 1px 0 var(--border-dark);
+  margin-bottom: 8px;
+}
+
+.window-header {
+  background: var(--window-title-bg);
+  color: var(--window-title-text);
+  font-weight: bold;
+  padding: 2px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.window-content {
+  padding: 8px;
+  border: 2px solid;
+  border-color: var(--border-dark) var(--border-light) var(--border-light)
+    var(--border-dark);
+}
+
+/* 버튼 스타일 */
+button {
+  background: var(--button-face);
+  border: 2px solid;
+  border-color: var(--border-light) var(--border-darker) var(--border-darker)
+    var(--border-light);
+  box-shadow: 1px 1px 0 var(--border-dark);
+  padding: 4px 8px;
+  font-family: "MS Sans Serif", "Segoe UI", Tahoma, sans-serif;
+  font-size: 12px;
+  color: var(--text-primary);
+  min-width: 75px;
+  text-align: center;
+  cursor: pointer;
+}
+
+button:active {
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  box-shadow: -1px -1px 0 var(--border-dark);
+  padding: 5px 7px 3px 9px;
+}
+
+.window-control {
+  width: 16px;
+  height: 14px;
+  min-width: unset;
+  padding: 0;
+  margin-left: 2px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.window-control:active {
+  padding: 1px 0 0 1px;
+}
+
+/* 입력 필드 스타일 */
+input,
+textarea,
+select {
+  border: 2px solid;
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  background: var(--window-bg);
+  padding: 2px 4px;
+}
+
+/* 링크 스타일 */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 인셋 패널 */
+.inset-panel {
+  border: 2px solid;
+  border-color: var(--border-darker) var(--border-light) var(--border-light)
+    var(--border-darker);
+  padding: 8px;
+  background: var(--window-bg);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  body {
+    padding: 4px;
+  }
+
+  .window {
+    margin-bottom: 4px;
+  }
+
+  .window-content {
+    padding: 4px;
+  }
+
+  button {
+    width: 100%;
+    margin: 2px 0;
+  }
+
+  .window-control {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 12px;
+  }
+
+  .window-header {
+    padding: 1px 2px;
+  }
+
+  .window-content {
+    padding: 2px;
+  }
+}
