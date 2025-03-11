@@ -153,7 +153,7 @@ export default function Home() {
                 </div>
                 <div className='value-item' style={{ paddingBottom: "4px" }}>
                   <span className='font-bold'>▶ 지향점</span>
-                  <p>짧은 삶 속, 빛나는 순간을 위해</p>
+                  <p>짧은 삶 속, 빛나는 순간을 위해.</p>
                 </div>
               </div>
               <div
