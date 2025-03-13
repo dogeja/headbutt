@@ -8,3 +8,244 @@
 @import "./components/navigation.css";
 @import "./components/cards.css";
 @import "./components/home.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 윈도우 98 레트로 폰트 설정 */
+@font-face {
+  font-family: "MS Sans Serif";
+  src: local("MS Sans Serif"), local("Microsoft Sans Serif"), local("Arial");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "MS Sans Serif";
+  src: local("MS Sans Serif Bold"), local("Microsoft Sans Serif Bold"),
+    local("Arial Bold");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* CRT 모니터 효과 */
+@keyframes flicker {
+  0% {
+    opacity: 0.27;
+  }
+  5% {
+    opacity: 0.3;
+  }
+  10% {
+    opacity: 0.27;
+  }
+  15% {
+    opacity: 0.32;
+  }
+  20% {
+    opacity: 0.28;
+  }
+  70% {
+    opacity: 0.26;
+  }
+  72% {
+    opacity: 0.3;
+  }
+  77% {
+    opacity: 0.26;
+  }
+  100% {
+    opacity: 0.28;
+  }
+}
+
+@keyframes scan {
+  0% {
+    background-position: 0 -100vh;
+  }
+  35%,
+  100% {
+    background-position: 0 100vh;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+    background-color: teal;
+    color: #000000;
+    font-size: 12px;
+    overflow-x: hidden;
+  }
+
+  /* CRT 모니터 효과 적용 - 미묘하게 조정 */
+  body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.15) 50%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.05),
+        rgba(0, 255, 0, 0.05),
+        rgba(0, 0, 255, 0.05)
+      );
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    animation: scan 7.5s linear infinite;
+    opacity: 0.7;
+  }
+
+  body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    z-index: 9998;
+    pointer-events: none;
+    animation: flicker 0.3s infinite;
+  }
+
+  /* Windows 98 스타일 스크롤바 */
+  ::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #c0c0c0;
+    border-left: 1px solid #808080;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+    border: 2px solid #c0c0c0;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+  }
+
+  ::-webkit-scrollbar-button:single-button {
+    background-color: #c0c0c0;
+    display: block;
+    border: 2px solid #c0c0c0;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    height: 16px;
+    width: 16px;
+  }
+
+  .container {
+    padding: 8px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .window {
+    border: solid 2px;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    background-color: #c0c0c0;
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+    margin-bottom: 8px;
+  }
+
+  .window-header {
+    background-color: #000080;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 2px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+    font-size: 12px;
+  }
+
+  .window-controls {
+    display: flex;
+  }
+
+  .window-control {
+    width: 16px;
+    height: 14px;
+    padding: 0;
+    margin-left: 2px;
+    background-color: #c0c0c0;
+    border: solid 2px;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    outline: 1px solid black;
+    outline-offset: -1px;
+  }
+
+  .window-control:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 1px 0 0 1px;
+  }
+
+  .window-content {
+    padding: 8px;
+    border-top: none;
+    background-color: #c0c0c0;
+  }
+
+  button {
+    background-color: #c0c0c0;
+    border: solid 2px;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+    font-size: 12px;
+    color: #000000;
+    text-align: center;
+    cursor: pointer;
+    padding: 4px 10px;
+    outline: 1px solid black;
+    outline-offset: -1px;
+  }
+
+  button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 5px 9px 3px 11px;
+  }
+
+  input,
+  textarea,
+  select {
+    border: solid 2px;
+    border-color: #808080 #ffffff #ffffff #808080;
+    background-color: white;
+    padding: 2px 4px;
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+    font-size: 12px;
+  }
+
+  a {
+    color: #0000ff;
+    text-decoration: none;
+  }
+
+  a:visited {
+    color: #800080;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* 추가 컴포넌트별 스타일 */

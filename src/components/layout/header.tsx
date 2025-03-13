@@ -29,69 +29,127 @@ export function Header() {
   };
 
   return (
-    <header className='top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-      <div className='container mx-auto px-4 h-16 flex items-center'>
-        <div className='flex items-center justify-between w-full'>
-          <div className='flex items-center gap-6 md:gap-10'>
-            <Link href='/' className='flex items-center space-x-2'>
-              <span className='font-bold text-xl'>καιρός</span>
+    <header className='w-full mb-4'>
+      <div className='px-2 py-1 flex items-center justify-between'>
+        <div className='flex items-center gap-4'>
+          <Link href='/' className='flex items-center'>
+            <span
+              className='font-bold text-xl'
+              style={{
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                color: "#000080",
+              }}
+            >
+              καιρός
+            </span>
+          </Link>
+
+          <nav className='hidden md:flex gap-4 pl-4'>
+            <Link
+              href='/about'
+              className='text-sm font-medium hover:underline'
+              style={{
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                color: "#0000ff",
+              }}
+            >
+              소개
             </Link>
+            <Link
+              href='/work'
+              className='text-sm font-medium hover:underline'
+              style={{
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                color: "#0000ff",
+              }}
+            >
+              작업물
+            </Link>
+            <Link
+              href='/contact'
+              className='text-sm font-medium hover:underline'
+              style={{
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                color: "#0000ff",
+              }}
+            >
+              문의
+            </Link>
+          </nav>
+        </div>
 
-            <nav className='hidden md:flex gap-6'>
+        <div className='flex items-center gap-2'>
+          {session ? (
+            <>
               <Link
-                href='/about'
-                className='text-sm font-medium transition-colors hover:text-primary'
+                href='/mypage'
+                className='text-sm font-medium px-2 py-1 hover:underline'
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  color: "#0000ff",
+                }}
               >
-                소개
+                마이페이지
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className='text-sm font-medium px-2 py-1'
+                style={{
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: "#c0c0c0",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "12px",
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
+                }}
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href='/auth/login'
+                style={{
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: "#c0c0c0",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "12px",
+                  padding: "2px 8px",
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
+                }}
+              >
+                로그인
               </Link>
               <Link
-                href='/work'
-                className='text-sm font-medium transition-colors hover:text-primary'
+                href='/auth/register'
+                style={{
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: "#c0c0c0",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "12px",
+                  padding: "2px 8px",
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
+                }}
+                className='hidden md:inline-flex'
               >
-                작업물
+                회원가입
               </Link>
-              <Link
-                href='/contact'
-                className='text-sm font-medium transition-colors hover:text-primary'
-              >
-                문의
-              </Link>
-            </nav>
-          </div>
-
-          <div className='flex items-center gap-4'>
-            {session ? (
-              <>
-                <Link
-                  href='/mypage'
-                  className='text-sm font-medium transition-colors hover:text-primary'
-                >
-                  마이페이지
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className='text-sm font-medium px-4 py-2 border rounded-md hover:bg-gray-100'
-                >
-                  로그아웃
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href='/login'
-                  className='text-sm font-medium px-4 py-2 border rounded-md hover:bg-gray-100'
-                >
-                  로그인
-                </Link>
-                <Link
-                  href='/signup'
-                  className='text-sm font-medium px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 hidden md:inline-flex'
-                >
-                  회원가입
-                </Link>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </header>

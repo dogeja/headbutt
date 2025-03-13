@@ -1,12 +1,18 @@
 "use client";
 
-import { WindowContainer } from "@/components/ui/WindowContainer";
-import { LoginForm } from "@/components/auth/LoginForm";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function LoginRedirectPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/auth/login");
+  }, [router]);
+
   return (
-    <WindowContainer title='로그인'>
-      <LoginForm />
-    </WindowContainer>
+    <div className='p-4 text-center'>
+      <p>로그인 페이지로 이동 중입니다...</p>
+    </div>
   );
 }

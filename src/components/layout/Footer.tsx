@@ -5,32 +5,111 @@ import Link from "next/link";
 export function Footer() {
   const year = new Date().getFullYear();
 
+  const win98Style = {
+    border: "solid 2px",
+    borderColor: "#ffffff #808080 #808080 #ffffff",
+    backgroundColor: "#c0c0c0",
+    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+  };
+
+  const windowHeaderStyle = {
+    backgroundColor: "#000080",
+    color: "#ffffff",
+    padding: "2px 4px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+    fontWeight: "bold",
+    fontSize: "12px",
+  };
+
+  const windowControlStyle = {
+    width: "16px",
+    height: "14px",
+    border: "solid 2px",
+    borderColor: "#ffffff #808080 #808080 #ffffff",
+    backgroundColor: "#c0c0c0",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "10px",
+    margin: "0 2px",
+    outline: "1px solid black",
+    outlineOffset: "-1px",
+  };
+
+  const linkStyle = {
+    color: "#0000ff",
+    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+    fontSize: "12px",
+  };
+
   return (
     <div className='footer'>
-      <div className='window'>
-        <div className='window-header'>
+      <div className='window' style={win98Style}>
+        <div className='window-header' style={windowHeaderStyle}>
           <span>정보</span>
-          <div className='window-controls'>
-            <button className='window-control'>─</button>
-            <button className='window-control'>□</button>
-            <button className='window-control'>×</button>
+          <div className='window-controls' style={{ display: "flex" }}>
+            <button className='window-control' style={windowControlStyle}>
+              ─
+            </button>
+            <button className='window-control' style={windowControlStyle}>
+              □
+            </button>
+            <button className='window-control' style={windowControlStyle}>
+              ×
+            </button>
           </div>
         </div>
         <div className='window-content p-4'>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             <div>
-              <h3 className='text-lg font-bold mb-2'>카이로스</h3>
-              <p className='text-sm mb-4'>
+              <h3
+                className='text-lg font-bold mb-2'
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "14px",
+                }}
+              >
+                카이로스
+              </h3>
+              <p
+                className='mb-4'
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "12px",
+                }}
+              >
                 삶의 결정적 순간을 포착하고
                 <br />
                 의미를 더하는 도구
               </p>
-              <p className='text-sm'>© {year} 카이로스. All rights reserved.</p>
+              <p
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "12px",
+                }}
+              >
+                © {year} 카이로스. All rights reserved.
+              </p>
             </div>
 
             <div>
-              <h3 className='text-lg font-bold mb-2'>이용안내</h3>
-              <ul className='text-sm space-y-2'>
+              <h3
+                className='text-lg font-bold mb-2'
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "14px",
+                }}
+              >
+                이용안내
+              </h3>
+              <ul className='space-y-2'>
                 {/* <li>
                   <Link href='/help' className='hover:underline'>
                     ▶ 도움말
@@ -42,7 +121,11 @@ export function Footer() {
                   </Link>
                 </li> */}
                 <li>
-                  <Link href='/contact' className='hover:underline'>
+                  <Link
+                    href='/contact'
+                    className='hover:underline'
+                    style={linkStyle}
+                  >
                     ▶ 문의하기
                   </Link>
                 </li>
@@ -50,8 +133,17 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className='text-lg font-bold mb-2'>법적 고지</h3>
-              <ul className='text-sm space-y-2'>
+              <h3
+                className='text-lg font-bold mb-2'
+                style={{
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  fontSize: "14px",
+                }}
+              >
+                법적 고지
+              </h3>
+              <ul className='space-y-2'>
                 {/* <li>
                   <Link href='/terms' className='hover:underline'>
                     ▶ 이용약관
@@ -67,6 +159,15 @@ export function Footer() {
                     ▶ 쿠키 정책
                   </Link>
                 </li> */}
+                <li>
+                  <Link
+                    href='/terms'
+                    className='hover:underline'
+                    style={linkStyle}
+                  >
+                    ▶ 이용약관
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

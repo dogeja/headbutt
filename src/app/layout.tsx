@@ -1,4 +1,3 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import "@/styles/index.css";
 import { Header } from "@/components/layout/header";
@@ -7,19 +6,6 @@ import { Toolbar } from "@/components/layout/Toolbar";
 import { Footer } from "@/components/layout/Footer";
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "카이로스",
@@ -33,9 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='ko'>
-      <body
-        className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}
-      >
+      <body>
         <div className='container'>
           {/* 메인 윈도우 */}
           <div className='window'>

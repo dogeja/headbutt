@@ -65,12 +65,9 @@ export function SignupSuccess({ user }: SignupSuccessProps) {
           </button>
         </div>
 
-        <div
-          className='pt-4 border-t'
-          style={{ borderColor: "var(--border-color)" }}
-        >
-          <Link href='/login'>
-            <Button fullWidth>로그인 페이지로</Button>
+        <div className='mt-6'>
+          <Link href='/auth/login'>
+            <Button fullWidth>로그인 페이지로 이동</Button>
           </Link>
         </div>
       </div>

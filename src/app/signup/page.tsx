@@ -1,17 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WindowContainer } from "@/components/ui/WindowContainer";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { SignupSuccess } from "@/components/auth/SignupSuccess";
 import { useSignup } from "@/lib/hooks/useSignup";
+import { useRouter } from "next/navigation";
 
-export default function SignupPage() {
-  const { isSuccess, newUser } = useSignup();
+export default function SignupRedirectPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/auth/register");
+  }, [router]);
 
   return (
-    <WindowContainer title={isSuccess ? "회원가입 완료" : "회원가입"}>
-      {isSuccess && newUser ? <SignupSuccess user={newUser} /> : <SignupForm />}
-    </WindowContainer>
+    <div className='p-4 text-center'>
+      <p>회원가입 페이지로 이동 중입니다...</p>
+    </div>
   );
 }

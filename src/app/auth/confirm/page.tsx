@@ -38,7 +38,7 @@ export default function EmailConfirmationPage() {
 
         // 3초 후 로그인 페이지로 이동
         setTimeout(() => {
-          router.push("/login");
+          router.push("/auth/login");
         }, 3000);
       } catch (err: any) {
         setError(err.message || "인증 과정에서 오류가 발생했습니다.");
@@ -72,7 +72,7 @@ export default function EmailConfirmationPage() {
             </p>
           </div>
 
-          <Link href='/login'>
+          <Link href='/auth/login'>
             <Button fullWidth>로그인 페이지로 이동</Button>
           </Link>
         </div>
@@ -87,11 +87,11 @@ export default function EmailConfirmationPage() {
           </div>
 
           <div className='space-y-3'>
-            <Link href='/login'>
+            <Link href='/auth/login'>
               <Button fullWidth>로그인 페이지로</Button>
             </Link>
 
-            <Link href='/signup'>
+            <Link href='/auth/register'>
               <Button variant='secondary' fullWidth>
                 회원가입 페이지로
               </Button>
