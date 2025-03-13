@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 
 export default function MyPage() {
   const [profile, setProfile] = useState<any>(null);
+  const [userLevel, setUserLevel] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
     getProfile();
+    getUserLevel();
   }, []);
 
   const getProfile = async () => {
@@ -30,7 +32,24 @@ export default function MyPage() {
     setProfile(data);
   };
 
-  if (!profile)
+  const getUserLevel = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      return;
+    }
+
+    const { data } = await supabase
+      .from("user_levels")
+      .select("level, experience_points")
+      .eq("user_id", session.user.id)
+      .single();
+
+    setUserLevel(data);
+  };
+
+  if (!profile || !userLevel)
     return (
       <div className='window mx-auto mt-10 max-w-md'>
         <div className='window-header'>
@@ -76,6 +95,16 @@ export default function MyPage() {
                 <div>
                   <label className='text-sm text-gray-500'>이메일</label>
                   <p className='text-lg font-medium'>{profile.email}</p>
+                </div>
+                <div>
+                  <label className='text-sm text-gray-500'>레벨</label>
+                  <p className='text-lg font-medium'>{userLevel.level}</p>
+                </div>
+                <div>
+                  <label className='text-sm text-gray-500'>경험치</label>
+                  <p className='text-lg font-medium'>
+                    {userLevel.experience_points}
+                  </p>
                 </div>
               </div>
             </div>
