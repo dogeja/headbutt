@@ -53,77 +53,80 @@ export function useSignup() {
   const [emailDebounceTimer, setEmailDebounceTimer] =
     useState<NodeJS.Timeout | null>(null);
 
+  // 이미 요청 중인지 확인하는 상태 추가
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cooldownTimer, setCooldownTimer] = useState<number | null>(null);
+
   // 이메일 유효성 검증
-  const validateEmail = useCallback(
-    (value: string) => {
-      // 기본 검증
-      if (!value) {
-        setEmailState({
-          valid: false,
-          message: "이메일을 입력해주세요",
-          checking: false,
-        });
-        return;
-      }
+  const validateEmail = useCallback((value: string) => {
+    // 기본 검증
+    if (!value) {
+      setEmailState({
+        valid: false,
+        message: "이메일을 입력해주세요",
+        checking: false,
+      });
+      return;
+    }
 
-      // 이메일 형식 검증
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(value)) {
-        setEmailState({
-          valid: false,
-          message: "올바른 이메일 형식이 아닙니다",
-          checking: false,
-        });
-        return;
-      }
+    // 이메일 형식 검증
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(value)) {
+      setEmailState({
+        valid: false,
+        message: "올바른 이메일 형식이 아닙니다",
+        checking: false,
+      });
+      return;
+    }
 
-      // 중복 검증
-      setEmailState({ valid: false, message: "", checking: true });
+    // 중복 검증
+    setEmailState({ valid: false, message: "", checking: true });
 
-      // 이전 타이머 취소
-      if (emailDebounceTimer) clearTimeout(emailDebounceTimer);
+    // 이전 타이머 취소
+    if (emailDebounceTimer) {
+      clearTimeout(emailDebounceTimer);
+    }
 
-      // 디바운스 적용
-      const timer = setTimeout(async () => {
-        try {
-          // 이메일 중복 검증용 쿼리 (profiles 테이블 사용)
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("email")
-            .eq("email", value)
-            .single();
+    // 디바운스 적용
+    const timer = setTimeout(async () => {
+      try {
+        // Supabase Auth API로 이메일 중복 확인
+        // auth.users 테이블에 email이 존재하는지 확인
+        const { data, error } = await supabase.auth.admin.listUsers();
 
-          if (error && error.code !== "PGRST116") {
-            throw error;
-          }
+        if (error) throw error;
 
-          if (data) {
-            setEmailState({
-              valid: false,
-              message: "이미 사용 중인 이메일입니다",
-              checking: false,
-            });
-          } else {
-            setEmailState({
-              valid: true,
-              message: "사용 가능한 이메일입니다",
-              checking: false,
-            });
-          }
-        } catch (err) {
-          console.error("이메일 확인 오류:", err);
+        // 이미 존재하는 이메일인지 확인
+        const emailExists = data.users.some((user) => user.email === value);
+
+        if (emailExists) {
           setEmailState({
             valid: false,
-            message: "이메일 확인 중 오류가 발생했습니다",
+            message: "이미 사용 중인 이메일입니다",
+            checking: false,
+          });
+        } else {
+          setEmailState({
+            valid: true,
+            message: "사용 가능한 이메일입니다",
             checking: false,
           });
         }
-      }, 600);
+      } catch (err) {
+        console.error("이메일 확인 중 오류:", err);
 
-      setEmailDebounceTimer(timer);
-    },
-    [emailDebounceTimer]
-  );
+        // 서버 확인이 불가능할 경우 형식만 검증하고 통과
+        setEmailState({
+          valid: true,
+          message: "이메일 형식이 올바릅니다",
+          checking: false,
+        });
+      }
+    }, 1200);
+
+    setEmailDebounceTimer(timer);
+  }, []);
 
   // 아이디 유효성 검증
   const validateLoginId = useCallback(
@@ -162,7 +165,9 @@ export function useSignup() {
       setLoginIdState({ valid: false, message: "", checking: true });
 
       // 이전 타이머 취소
-      if (idDebounceTimer) clearTimeout(idDebounceTimer);
+      if (idDebounceTimer) {
+        clearTimeout(idDebounceTimer);
+      }
 
       // 디바운스 적용
       const timer = setTimeout(async () => {
@@ -170,14 +175,13 @@ export function useSignup() {
           const { data, error } = await supabase
             .from("profiles")
             .select("username")
-            .eq("username", value)
-            .single();
+            .eq("username", value);
 
-          if (error && error.code !== "PGRST116") {
+          if (error) {
             throw error;
           }
 
-          if (data) {
+          if (data && data.length > 0) {
             setLoginIdState({
               valid: false,
               message: "이미 사용 중인 아이디입니다",
@@ -190,19 +194,23 @@ export function useSignup() {
               checking: false,
             });
           }
-        } catch (err) {
-          console.error("아이디 확인 오류:", err);
+        } catch (err: any) {
+          console.error(
+            "아이디 확인 오류:",
+            err?.message || err?.code || "알 수 없는 오류"
+          );
           setLoginIdState({
             valid: false,
             message: "아이디 확인 중 오류가 발생했습니다",
             checking: false,
           });
         }
-      }, 600);
+      }, 1200);
 
       setIdDebounceTimer(timer);
     },
-    [idDebounceTimer]
+    // 빈 의존성 배열로 변경
+    []
   );
 
   // 비밀번호 유효성 검증
@@ -286,14 +294,30 @@ export function useSignup() {
     [password]
   );
 
-  // 입력값 변경 시 유효성 검증 호출
+  // useEffect 변경하여 의존성 문제 해결
   useEffect(() => {
-    if (email) validateEmail(email);
-  }, [email, validateEmail]);
+    let isActive = true;
+
+    if (email) {
+      validateEmail(email);
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [email]);
 
   useEffect(() => {
-    if (loginId) validateLoginId(loginId);
-  }, [loginId, validateLoginId]);
+    let isActive = true;
+
+    if (loginId) {
+      validateLoginId(loginId);
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [loginId]);
 
   useEffect(() => {
     if (password) validatePassword(password);
@@ -307,6 +331,13 @@ export function useSignup() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors([]);
+
+    // 이미 제출 중이거나 쿨다운 타이머가 활성화된 경우 중복 요청 방지
+    if (isSubmitting || cooldownTimer !== null) {
+      const remainingTime = cooldownTimer ? Math.ceil(cooldownTimer / 1000) : 0;
+      setFormErrors([`잠시 후 다시 시도해주세요 (${remainingTime}초 후 가능)`]);
+      return;
+    }
 
     // 모든 필드 유효성 검증
     const errors: string[] = [];
@@ -336,6 +367,7 @@ export function useSignup() {
 
     // 로딩 상태 활성화
     setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       // 1. 새 계정 생성
@@ -350,6 +382,7 @@ export function useSignup() {
             username: loginId,
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
         },
       });
 
@@ -363,7 +396,6 @@ export function useSignup() {
               id: user.id,
               username: loginId,
               full_name: fullName,
-              email,
             },
           ],
           { onConflict: "id" }
@@ -371,29 +403,74 @@ export function useSignup() {
 
         if (profileError) throw profileError;
 
-        // 3. 성공 상태 설정
+        // 3. 성공 상태 설정 및 사용자 정보 저장
         setNewUser({
           loginId,
           email,
           fullName,
         });
         setIsSuccess(true);
+
+        // 로컬 스토리지에 인증 대기 상태 저장 (선택 사항)
+        localStorage.setItem("pendingEmailVerification", email);
       }
     } catch (error: any) {
       console.error("회원가입 오류:", error);
-      setFormErrors([`회원가입 중 오류가 발생했습니다: ${error.message}`]);
+
+      // Supabase 오류 메시지를 사용자 친화적으로 변환
+      if (error.message.includes("For security purposes")) {
+        setFormErrors(["요청이 너무 빈번합니다. 잠시 후 다시 시도해주세요."]);
+      } else if (error.message.includes("User already registered")) {
+        setFormErrors([
+          "이미 가입된 이메일입니다. 로그인을 시도하거나 비밀번호 재설정을 해주세요.",
+        ]);
+      } else {
+        setFormErrors([`회원가입 중 오류가 발생했습니다: ${error.message}`]);
+      }
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // 타이머 정리
+  // 추가로 focusout 이벤트 핸들러를 만들어 검증 상태를 직접 제어
+  const handleFieldBlur = useCallback((field: "email" | "loginId") => {
+    if (field === "email" && emailDebounceTimer) {
+      clearTimeout(emailDebounceTimer);
+      setEmailDebounceTimer(null);
+      setEmailState((prev) => {
+        // checking이 true일 때만 변경
+        if (prev.checking) {
+          return { ...prev, checking: false };
+        }
+        return prev;
+      });
+    }
+
+    if (field === "loginId" && idDebounceTimer) {
+      clearTimeout(idDebounceTimer);
+      setIdDebounceTimer(null);
+      setLoginIdState((prev) => {
+        if (prev.checking) {
+          return { ...prev, checking: false };
+        }
+        return prev;
+      });
+    }
+  }, []); // 의존성 배열 비움
+
+  // 컴포넌트 언마운트 시 정리 로직
   useEffect(() => {
     return () => {
-      if (idDebounceTimer) clearTimeout(idDebounceTimer);
-      if (emailDebounceTimer) clearTimeout(emailDebounceTimer);
+      // 모든 타이머 정리
+      if (idDebounceTimer) {
+        clearTimeout(idDebounceTimer);
+      }
+      if (emailDebounceTimer) {
+        clearTimeout(emailDebounceTimer);
+      }
     };
-  }, [idDebounceTimer, emailDebounceTimer]);
+  }, []); // 빈 의존성 배열로 변경
 
   return {
     // 입력 상태
@@ -432,5 +509,8 @@ export function useSignup() {
         : "",
     isCheckingEmail: emailState.checking,
     isCheckingId: loginIdState.checking,
+
+    // 필드 블러 핸들러 추가
+    handleFieldBlur,
   };
 }

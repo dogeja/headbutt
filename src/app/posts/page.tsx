@@ -5,14 +5,16 @@ import { PostList } from "@/components/posts/PostList";
 import { getPosts } from "@/services/posts";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { format } from "date-fns";
 
 // Post 타입 정의
 type Post = {
   id: string;
   title: string;
   author_name: string;
-  created_at: Date;
+  created_at: Date | string;
   view_count: number;
+  comment_count?: number;
   content?: string;
 };
 
@@ -22,32 +24,43 @@ export default function PostsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "popular">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadPosts() {
+      setIsLoading(true);
+      setError("");
+
       try {
-        // 게시글 목록 가져오기
-        const postsData = await getPosts();
-        console.log("받아온 게시글 데이터(페이지):", postsData);
-
-        // 데이터 형식 확인 및 필요한 필드가 있는지 검증
-        const processedPosts = postsData.map((post) => ({
-          ...post,
-          // content가 없으면 기본 메시지 설정
-          content: post.content || "내용이 없습니다.",
-        }));
-
-        setPosts(processedPosts);
+        // 상세 오류 로깅을 위한 개별 try-catch
+        try {
+          const postsData = await getPosts();
+          setPosts(postsData);
+        } catch (err: any) {
+          // 오류 메시지 상세 출력
+          console.error(
+            "게시글 불러오기 상세 오류:",
+            err?.message || err?.code || JSON.stringify(err)
+          );
+          throw err;
+        }
       } catch (error) {
         console.error("게시글 불러오기 오류:", error);
+        setError("게시글을 불러오는 중 오류가 발생했습니다.");
       } finally {
         setIsLoading(false);
       }
     }
 
     async function checkAuth() {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
+      try {
+        const { data } = await supabase.auth.getUser();
+        setCurrentUser(data.user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error("인증 확인 오류:", err);
+      }
     }
 
     loadPosts();
@@ -69,6 +82,14 @@ export default function PostsPage() {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     });
+
+  // 새 게시글 작성 시 로그인 확인
+  const handleWriteClick = () => {
+    if (!currentUser) {
+      alert("게시글을 작성하려면 로그인이 필요합니다.");
+      return;
+    }
+  };
 
   return (
     <div className='container mx-auto p-4 max-w-4xl'>
@@ -285,11 +306,81 @@ export default function PostsPage() {
       </div>
 
       {/* 게시글 목록 */}
-      <PostList
-        posts={filteredPosts}
-        isLoading={isLoading}
-        isAuthenticated={isAuthenticated}
-      />
+      {isLoading ? (
+        <div className='text-center py-8'>
+          <p>게시글을 불러오는 중입니다...</p>
+        </div>
+      ) : error ? (
+        <div className='text-center py-8'>
+          <p className='text-red-600'>{error}</p>
+          <button
+            className='mt-2 text-blue-600 hover:underline'
+            onClick={() => window.location.reload()}
+          >
+            다시 시도하기
+          </button>
+        </div>
+      ) : posts.length === 0 ? (
+        <div className='text-center py-8'>
+          <p>등록된 게시글이 없습니다.</p>
+        </div>
+      ) : (
+        <div
+          className='mb-4 overflow-x-auto'
+          style={{ border: "var(--inset-border)" }}
+        >
+          <table className='w-full min-w-[600px]' cellPadding='8'>
+            <thead>
+              <tr className='bg-gray-100'>
+                {/* 제목 너비 줄이고 작성자 너비 늘림 */}
+                <th className='text-left font-medium w-6/12'>제목</th>
+                <th className='text-left font-medium w-3/12'>작성자</th>
+                <th className='text-center font-medium w-2/12'>작성일</th>
+                <th className='text-center font-medium w-1/12'>조회</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPosts.map((post) => (
+                <tr
+                  key={post.id}
+                  className='border-t border-gray-200 hover:bg-gray-50 transition-colors'
+                >
+                  <td className='p-0'>
+                    <Link
+                      href={`/posts/${post.id}`}
+                      className='block p-4 h-full'
+                    >
+                      <div className='flex items-center'>
+                        <div className='truncate mr-2'>{post.title}</div>
+                        {/* 댓글 수 표시 */}
+                        {post.comment_count && post.comment_count > 0 ? (
+                          <div className='text-blue-600 whitespace-nowrap flex-shrink-0'>
+                            [{post.comment_count}]
+                          </div>
+                        ) : null}
+                      </div>
+                    </Link>
+                  </td>
+                  {/* 작성자 이름 길이 처리 */}
+                  <td>
+                    <div
+                      className='truncate'
+                      style={{ maxWidth: "150px" }}
+                      title={post.author_name}
+                    >
+                      {post.author_name}
+                    </div>
+                  </td>
+                  <td className='text-center text-sm whitespace-nowrap'>
+                    {format(new Date(post.created_at), "yyyy-MM-dd")}
+                  </td>
+                  <td className='text-center'>{post.view_count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* 바닥글 */}
       <div

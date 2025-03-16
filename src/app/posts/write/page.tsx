@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/posts/PostForm";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { createPost } from "@/services/posts";
 
 export default function WritePostPage() {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 인증 상태 확인 (Supabase Auth 사용)
   useEffect(() => {
@@ -90,6 +92,34 @@ export default function WritePostPage() {
   }
 
   // 로그인 상태일 경우 게시글 작성 폼 표시
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // ... 기존 유효성 검사 코드 ...
+
+    setIsSubmitting(true);
+    try {
+      // 현재 사용자 프로필 정보 가져오기
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("username, full_name")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // 작성자 이름 설정 (full_name이 있으면 full_name, 없으면 username 사용)
+      const authorName = profileData.full_name || profileData.username;
+
+      const newPost = await createPost(title, content);
+      router.push(`/posts/${newPost.id}`);
+    } catch (err) {
+      // ... 에러 처리 코드 ...
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className='container mx-auto p-4 max-w-4xl'>
       <div

@@ -51,7 +51,7 @@ export default function Work() {
           </div>
         </div>
         <div className='window-content'>
-          <h1 className='text-xl bold mb-4'>카이로스 앱 개발 중!</h1>
+          <h1 className='text-xl bold mb-4'>앱 개발 중!</h1>
           <p className='text-sm mb-4'>
             여러분의 소중한 순간을 더 쉽게 기록하고 의미를 더할 수 있는 앱을
             개발 중입니다.
@@ -109,11 +109,10 @@ export default function Work() {
             <div className='window-content p-4'>
               <h2 className='text-lg bold mb-4'>앱 출시 소식을 받아보세요</h2>
               <p className='text-sm mb-4'>
-                앱 출시 소식과 베타 테스트 기회를 받아보고 싶다면, 연락처를
-                남겨주세요. 가장 먼저 소식을 전해드리겠습니다!
+                앱 출시 소식을 받아보고 싶다면, 회원이 되어주세요!
               </p>
 
-              <Link href='/contact'>
+              <Link href='/auth/register'>
                 <div
                   className='menu-item'
                   style={{ background: "#d4d0c8", marginBottom: "4px" }}

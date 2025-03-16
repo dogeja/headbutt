@@ -27,6 +27,7 @@ export function SignupForm() {
     formErrors,
 
     handleSignUp,
+    handleFieldBlur,
   } = useSignup();
 
   return (
@@ -58,6 +59,7 @@ export function SignupForm() {
           type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => handleFieldBlur("email")}
           error={emailState.valid ? "✓" : emailState.message}
           success={emailState.valid ? emailState.message : ""}
           hint='실제 이메일 주소를 입력해주세요'
@@ -70,6 +72,7 @@ export function SignupForm() {
           type='text'
           value={loginId}
           onChange={(e) => setLoginId(e.target.value)}
+          onBlur={() => handleFieldBlur("loginId")}
           error={loginIdState.valid ? "✓" : loginIdState.message}
           success={loginIdState.valid ? loginIdState.message : ""}
           hint='4~20자의 영문, 숫자, 밑줄(_) 조합'

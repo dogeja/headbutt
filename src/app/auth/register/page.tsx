@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const { isSuccess, newUser } = useSignup();
 
   return (
-    <WindowContainer title={isSuccess ? "회원가입 완료" : "회원가입"}>
+    <WindowContainer title={isSuccess ? "이메일 인증 필요" : "회원가입"}>
       {isSuccess && newUser ? <SignupSuccess user={newUser} /> : <SignupForm />}
     </WindowContainer>
   );

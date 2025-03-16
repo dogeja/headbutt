@@ -158,7 +158,7 @@ export default function Home() {
               fontSize: "12px",
             }}
           >
-            https://www.kairos.digital/
+            https://www.kairos.com/
           </div>
           <button
             style={{
