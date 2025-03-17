@@ -13,6 +13,8 @@ export default function WritePostPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   // 인증 상태 확인 (Supabase Auth 사용)
   useEffect(() => {
@@ -34,6 +36,60 @@ export default function WritePostPage() {
 
     checkAuth();
   }, []);
+
+  // 제목과 내용 변경 핸들러
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+  };
+
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+  };
+
+  // 폼 제출 핸들러
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 기본 유효성 검사
+    if (!title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+
+    if (!content.trim()) {
+      alert("내용을 입력해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 현재 사용자 프로필 정보 가져오기
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("username, full_name")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // 작성자 이름 설정 (full_name이 있으면 full_name, 없으면 username 사용)
+      const authorName = profileData.full_name || profileData.username;
+
+      // 게시글 생성
+      const newPost = await createPost(title, content);
+
+      router.push(`/posts/${newPost.id}`);
+    } catch (err: any) {
+      console.error("게시글 작성 중 오류:", err);
+      alert(
+        `게시글 작성 중 오류가 발생했습니다: ${
+          err.message || "알 수 없는 오류"
+        }`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // 인증 상태 확인 중
   if (isCheckingAuth) {
@@ -92,34 +148,6 @@ export default function WritePostPage() {
   }
 
   // 로그인 상태일 경우 게시글 작성 폼 표시
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // ... 기존 유효성 검사 코드 ...
-
-    setIsSubmitting(true);
-    try {
-      // 현재 사용자 프로필 정보 가져오기
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("username, full_name")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // 작성자 이름 설정 (full_name이 있으면 full_name, 없으면 username 사용)
-      const authorName = profileData.full_name || profileData.username;
-
-      const newPost = await createPost(title, content);
-      router.push(`/posts/${newPost.id}`);
-    } catch (err) {
-      // ... 에러 처리 코드 ...
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className='container mx-auto p-4 max-w-4xl'>
       <div
@@ -143,7 +171,14 @@ export default function WritePostPage() {
           </div>
 
           <div>
-            <PostForm />
+            <PostForm
+              onSubmit={handleSubmit}
+              onTitleChange={handleTitleChange}
+              onContentChange={handleContentChange}
+              title={title}
+              content={content}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
       </div>

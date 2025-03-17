@@ -11,13 +11,13 @@ export default function Privacy() {
           </div>
         </div>
         <div className='window-content'>
-          <h1 className='text-xl bold mb-4'>카이로스 개인정보처리방침</h1>
+          <h1 className='text-xl bold mb-4'>워터베어러 개인정보처리방침</h1>
           <div className='p-4' style={{ border: "var(--inset-border)" }}>
             <p className='mb-4 text-sm'>최종 업데이트: 2024년 3월 19일</p>
 
             <p className='text-sm mb-4'>
-              카이로스(이하 "회사")는 이용자의 개인정보를 중요시하며, 「개인정보
-              보호법」을 준수하기 위해 노력하고 있습니다. 회사는
+              워터베어러(이하 "회사")는 이용자의 개인정보를 중요시하며,
+              「개인정보 보호법」을 준수하기 위해 노력하고 있습니다. 회사는
               개인정보처리방침을 통하여 회사가 이용자로부터 수집하는 개인정보의
               항목, 개인정보의 수집 및 이용목적, 개인정보의 보유 및 이용기간,
               개인정보의 제3자 제공 등에 관한 사항을 이용자에게 알려드립니다.

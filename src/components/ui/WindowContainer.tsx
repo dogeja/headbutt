@@ -24,7 +24,7 @@ export function WindowContainer({
   return (
     <div className={`window mx-auto mt-10 ${maxWidthMap[maxWidth]}`}>
       <div className='window-header'>
-        <span>{title}</span>
+        <div className='window-title'>{title || "워터베어러"}</div>
         <div className='window-controls'>
           <button className='window-control'>─</button>
           <button className='window-control'>□</button>

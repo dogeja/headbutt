@@ -1,47 +1,51 @@
 import "./globals.css";
 import "@/styles/index.css";
-import { Header } from "@/components/layout/header";
-import { Navigation } from "@/components/layout/Navigation";
+import Header from "@/components/layout/header";
 import { Toolbar } from "@/components/layout/Toolbar";
 import { Footer } from "@/components/layout/Footer";
-
 import type { Metadata } from "next";
+import { Inter, VT323 } from "next/font/google";
+import Taskbar from "@/components/layout/Taskbar";
+
+// 기본 글꼴 및 복고풍 글꼴 불러오기
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const vt323 = VT323({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--font-vt323",
+});
 
 export const metadata: Metadata = {
-  title: "카이로스",
-  description: "순간을 놓치지 않게",
+  title: "워터베어러 - 지속의 지혜, 흐름의 철학",
+  description: "워터베어러를 통해 지속 가능한 삶의 철학을 만나보세요.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang='ko'>
-      <body>
-        <div className='container'>
-          {/* 메인 윈도우 */}
-          <div className='window'>
-            <div className='window-header'>
-              <span>Explorer</span>
-              <div className='window-controls'>
-                <button className='window-control'>─</button>
-                <button className='window-control'>□</button>
-                <button className='window-control'>×</button>
-              </div>
-            </div>
-            <div className='window-content'>
-              <Header />
-              <Navigation />
-              <main className='flex-1'>{children}</main>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <Footer />
-        </div>
-        <Toolbar />
+      <head>
+        {/* 90-00년대 웹 폰트 추가 */}
+        <link
+          rel='stylesheet'
+          href='https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'
+        />
+        <link
+          rel='stylesheet'
+          href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap'
+        />
+      </head>
+      <body
+        className={`${inter.variable} ${vt323.variable} font-sans`}
+        style={{ backgroundColor: "#008080" }}
+      >
+        <main className='container mx-auto p-4 pb-16'>
+          <div className='window'>{children}</div>
+        </main>
+        <Taskbar />
       </body>
     </html>
   );

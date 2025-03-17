@@ -11,13 +11,13 @@ export default function Terms() {
           </div>
         </div>
         <div className='window-content'>
-          <h1 className='text-xl bold mb-4'>카이로스 서비스 이용약관</h1>
+          <h1 className='text-xl bold mb-4'>워터베어러 서비스 이용약관</h1>
           <div className='p-4' style={{ border: "var(--inset-border)" }}>
             <p className='mb-4 text-sm'>최종 업데이트: 2024년 3월 19일</p>
 
             <h2 className='bold mb-2'>제1조 (목적)</h2>
             <p className='text-sm mb-4'>
-              이 약관은 카이로스(이하 "회사")가 제공하는 서비스의 이용조건 및
+              이 약관은 워터베어러(이하 "회사")가 제공하는 서비스의 이용조건 및
               절차, 기타 필요한 사항을 규정함을 목적으로 합니다.
             </p>
 

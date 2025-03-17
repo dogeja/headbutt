@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export function Toolbar() {
   const router = useRouter();
@@ -106,6 +107,9 @@ export function Toolbar() {
         padding: "4px",
       }}
     >
+      <div className='toolbar-brand'>
+        <Link href='/'>워터베어러</Link>
+      </div>
       <button style={buttonStyle} onClick={goToHome} title='홈'>
         🏠
       </button>

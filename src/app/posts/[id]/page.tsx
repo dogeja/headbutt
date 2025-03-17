@@ -149,7 +149,7 @@ const CommentForm = ({
         <Button
           type='submit'
           disabled={isSubmitting || !content.trim()}
-          size='sm'
+          size='md'
         >
           {isSubmitting ? "작성 중..." : "댓글 작성"}
         </Button>
@@ -442,12 +442,9 @@ export default function PostDetailPage({ params }: { params: any }) {
           {/* 버튼 그룹 */}
           <div className='flex justify-between mb-6'>
             <Link href='/posts'>
-              <button
-                className='button'
-                style={{ border: "var(--outset-border)" }}
-              >
+              <Button variant='secondary' size='sm'>
                 목록으로
-              </button>
+              </Button>
             </Link>
 
             {isAuthor && (

@@ -1,61 +1,37 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Navigation() {
-  const router = useRouter();
   const pathname = usePathname();
 
-  const goBack = () => {
-    router.back();
-  };
-
-  const goHome = () => {
-    router.push("/");
-  };
-
-  const goCommunity = () => {
-    router.push("/posts");
-  };
-
-  // 현재 경로에 따라 활성화된 버튼 스타일 적용
-  const isActive = (path: string) => {
-    return pathname === path ? "active-nav-button" : "";
-  };
+  // 간소화된 네비게이션 메뉴
+  const mainMenuItems = [
+    { label: "소개", href: "/about" },
+    { label: "서비스", href: "/work" },
+    { label: "커뮤니티", href: "/posts" },
+    { label: "문의하기", href: "/contact" },
+  ];
 
   return (
-    <div className='navigation'>
-      <div className='main-nav'>
-        <button className='nav-button' onClick={goBack} title='뒤로 가기'>
-          ⬅️
-        </button>
-        <button
-          className={`nav-button ${isActive("/")}`}
-          onClick={goHome}
-          title='홈으로'
-        >
-          🏠
-        </button>
-        <button
-          className={`nav-button ${isActive("/posts")}`}
-          onClick={goCommunity}
-          title='커뮤니티'
-        >
-          👥
-        </button>
+    <nav className='main-navigation'>
+      <div className='brand-section'>
+        <Link href='/' className='brand-logo'>
+          워터베어러
+        </Link>
       </div>
 
-      <style jsx>{`
-        .main-nav {
-          display: flex;
-          gap: 4px;
-        }
-
-        .active-nav-button {
-          background-color: var(--button-highlight);
-          border: var(--inset-border);
-        }
-      `}</style>
-    </div>
+      <ul className='nav-menu'>
+        {mainMenuItems.map((item) => (
+          <li
+            key={item.href}
+            className={pathname === item.href ? "active" : ""}
+          >
+            <Link href={item.href}>{item.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

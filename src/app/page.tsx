@@ -158,7 +158,7 @@ export default function Home() {
               fontSize: "12px",
             }}
           >
-            https://www.kairos.com/
+            https://www.waterbearer.io/
           </div>
           <button
             style={{
@@ -370,7 +370,7 @@ export default function Home() {
       {/* 시작 윈도우 */}
       <div className='window mb-4'>
         <div className='window-header'>
-          <span>Kairos Digital</span>
+          <span>워터베어러</span>
           <div className='window-controls'>
             <button className='window-control'>─</button>
             <button className='window-control'>□</button>
@@ -402,7 +402,7 @@ export default function Home() {
                       '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
                   }}
                 >
-                  이미지 뷰어 - Kairos.jpg
+                  이미지 뷰어 - cleanthes.png
                 </div>
 
                 <div
@@ -415,8 +415,8 @@ export default function Home() {
                   }}
                 >
                   <Image
-                    src='/images/projects/info_img01.jpg'
-                    alt='Kairos - 순간의 가치'
+                    src='/images/projects/info_img01.png'
+                    alt='cleanthes'
                     width={300}
                     height={400}
                     className='rounded-lg'
@@ -508,7 +508,7 @@ export default function Home() {
                   color: "#000080",
                 }}
               >
-                카이로스 - 당신의 모든 순간을 위해
+                워터베어러 - 지속의 지혜, 흐름의 철학
               </h1>
               <div
                 style={{
@@ -519,19 +519,15 @@ export default function Home() {
                 }}
               >
                 <p className='mb-6 text-secondary'>
-                  카이로스(Καιρός)는 그리스어로 '결정적 순간' 또는 '적절한
-                  기회'를 의미합니다.
+                  워터베어러(WaterBearer)는 고대 그리스 철학자 클레안테스의
+                  이야기에서 영감을 얻었습니다. '물 긷는 자'라는 별명으로 불리던
+                  그는 낮에는 철학을 배우고 밤에는 물을 길어 나르며 지속가능한
+                  방식으로 자기계발을 이루어냈습니다.
                   <br />
                   <br />
-                  우리는 짧은 삶 속 소중한 순간을 포착하고, 그 가치를 더하는
-                  도구를 만듭니다. 시간에는 '크로노스(χρόνος)'와
-                  '카이로스(καιρός)' 두 가지 개념이 있습니다. 크로노스가
-                  일정하게 흐르는 시간이라면, 카이로스는 우리에게 특별한 의미를
-                  지닌 순간을 뜻합니다.
-                  <br />
-                  <br />
-                  소중한 순간이 스쳐 지나가지 않도록. 그것이 바로 카이로스가
-                  존재하는 이유입니다.
+                  우리는 현대인의 삶에 이러한 지속가능한 리듬과 의미 있는 노력을
+                  접목시키는 도구를 제공합니다. 끊임없는 알림과 압박 속에서도
+                  자신의 리듬을 찾고 진정한 가치에 집중할 수 있도록 돕습니다.
                 </p>
               </div>
               <div className='flex gap-4 mt-4'>
@@ -662,7 +658,7 @@ export default function Home() {
                 className='text-xl font-bold mb-4'
                 style={{ color: "#000080" }}
               >
-                카이로스의 약속
+                우리의 약속
               </h2>
               <div
                 className='value-list'
@@ -682,11 +678,17 @@ export default function Home() {
                   }}
                 >
                   <span className='font-bold'>▶ 핵심 가치</span>
-                  <p>소중한 순간을 기록하고 의미를 더하다</p>
+                  <p>
+                    정말 중요한 일에 에너지를 집중하고, 나머지는 과감히 내려놓을
+                    수 있는 지혜를 추구합니다.
+                  </p>
                 </div>
                 <div className='value-item' style={{ paddingBottom: "4px" }}>
                   <span className='font-bold'>▶ 지향점</span>
-                  <p>짧은 삶 속, 빛나는 순간을 위해.</p>
+                  <p>
+                    단기적인 생산성 폭발이 아닌, 평생 유지할 수 있는 건강한
+                    생산성 습관을 형성합니다.
+                  </p>
                 </div>
               </div>
               <div
@@ -699,7 +701,7 @@ export default function Home() {
                 }}
               >
                 <p className='text-sm italic'>
-                  "카이로스 - 당신의 모든 순간을 위해"
+                  "워터베어러 - 지속의 지혜, 흐름의 철학"
                 </p>
               </div>
             </div>
@@ -758,7 +760,7 @@ export default function Home() {
                   </td>
                   <td style={{ padding: "4px", border: "solid 1px #808080" }}>
                     <a href='#' style={{ color: "#0000ff" }}>
-                      카이로스 서비스 업데이트 안내
+                      워터베어러 서비스 업데이트 안내
                     </a>
                   </td>
                 </tr>
@@ -778,7 +780,7 @@ export default function Home() {
                   </td>
                   <td style={{ padding: "4px", border: "solid 1px #808080" }}>
                     <a href='#' style={{ color: "#0000ff" }}>
-                      카이로스 커뮤니티 오픈 안내
+                      워터베어러 커뮤니티 오픈 안내
                     </a>
                   </td>
                 </tr>
@@ -827,7 +829,7 @@ export default function Home() {
               marginBottom: "16px",
             }}
           >
-            <p className='mb-4'>카이로스 디지털에 오신 것을 환영합니다!</p>
+            <p className='mb-4'>워터베어러에 오신 것을 환영합니다!</p>
             <p>
               지금{" "}
               <Link

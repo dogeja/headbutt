@@ -3,7 +3,7 @@
 import React from "react";
 import { useSignup } from "@/lib/hooks/useSignup";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/button";
+import { CustomButton as Button } from "@/components/ui/CustomButton";
 
 export function SignupForm() {
   const {

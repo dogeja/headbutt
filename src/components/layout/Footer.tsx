@@ -73,7 +73,7 @@ export function Footer() {
                   fontSize: "14px",
                 }}
               >
-                카이로스
+                워터베어러
               </h3>
               <p
                 className='mb-4'
@@ -94,7 +94,7 @@ export function Footer() {
                   fontSize: "12px",
                 }}
               >
-                © {year} 카이로스. All rights reserved.
+                © {year} 워터베어러. All rights reserved.
               </p>
             </div>
 
@@ -171,6 +171,12 @@ export function Footer() {
               </ul>
             </div>
           </div>
+        </div>
+      </div>
+      <div className='footer-content'>
+        <div className='copyright'>
+          <p>© 2024 워터베어러. All rights reserved.</p>
+          <p className='text-sm text-gray-500'>지속의 지혜, 흐름의 철학</p>
         </div>
       </div>
     </div>

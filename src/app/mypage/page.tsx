@@ -7,49 +7,75 @@ import { useRouter } from "next/navigation";
 export default function MyPage() {
   const [profile, setProfile] = useState<any>(null);
   const [userLevel, setUserLevel] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    getProfile();
-    getUserLevel();
-  }, []);
+    // 통합된 데이터 로딩 함수
+    const loadUserData = async () => {
+      try {
+        // 1. 세션 확인 (한 번만)
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-  const getProfile = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      router.push("/auth/login");
-      return;
-    }
+        if (!session) {
+          router.push("/auth/login");
+          return;
+        }
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", session.user.id)
-      .single();
+        const userId = session.user.id;
 
-    setProfile(data);
-  };
+        // 2. 프로필 정보 로딩
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
 
-  const getUserLevel = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      return;
-    }
+        if (profileError) {
+          console.error("프로필 로딩 오류:", profileError);
+          // 프로필 오류가 있어도 계속 진행
+        } else {
+          setProfile(profileData);
+        }
 
-    const { data } = await supabase
-      .from("user_levels")
-      .select("level, experience_points")
-      .eq("user_id", session.user.id)
-      .single();
+        // 3. 사용자 레벨 정보 로딩 (오류 처리 강화)
+        try {
+          const { data: levelData, error: levelError } = await supabase
+            .from("user_levels")
+            .select("level, experience_points")
+            .eq("user_id", userId)
+            .single();
 
-    setUserLevel(data);
-  };
+          if (levelError) {
+            console.warn("사용자 레벨 로딩 오류:", levelError);
+            // 오류 발생시 기본값 설정
+            setUserLevel({ level: 1, experience_points: 0 });
+          } else if (levelData) {
+            setUserLevel(levelData);
+          } else {
+            // 데이터가 없는 경우 기본값 설정
+            setUserLevel({ level: 1, experience_points: 0 });
+          }
+        } catch (levelErr) {
+          console.error("레벨 데이터 처리 중 예외 발생:", levelErr);
+          // 예외 발생시 기본값 설정
+          setUserLevel({ level: 1, experience_points: 0 });
+        }
+      } catch (err) {
+        console.error("데이터 로딩 중 오류:", err);
+      } finally {
+        // 항상 로딩 상태 종료
+        setIsLoading(false);
+      }
+    };
 
-  if (!profile || !userLevel)
+    loadUserData();
+  }, [router]);
+
+  // 로딩 중 UI 개선
+  if (isLoading) {
     return (
       <div className='window mx-auto mt-10 max-w-md'>
         <div className='window-header'>
@@ -60,9 +86,41 @@ export default function MyPage() {
             <button className='window-control'>×</button>
           </div>
         </div>
+        <div className='window-content p-4 text-center'>
+          <div className='w-8 h-8 border-4 border-t-primary border-gray-200 rounded-full animate-spin mx-auto mb-2'></div>
+          <p>사용자 정보를 불러오는 중입니다...</p>
+        </div>
       </div>
     );
+  }
 
+  // 프로필 데이터가 없는 경우
+  if (!profile) {
+    return (
+      <div className='window mx-auto mt-10 max-w-md'>
+        <div className='window-header'>
+          <span>정보 없음</span>
+          <div className='window-controls'>
+            <button className='window-control'>─</button>
+            <button className='window-control'>□</button>
+            <button className='window-control'>×</button>
+          </div>
+        </div>
+        <div className='window-content p-4 text-center'>
+          <p className='mb-4'>사용자 프로필 정보를 찾을 수 없습니다.</p>
+          <button
+            className='button'
+            style={{ border: "var(--outset-border)" }}
+            onClick={() => window.location.reload()}
+          >
+            새로고침
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 기존 UI 코드 유지
   return (
     <div className='p-4'>
       <div className='window mb-4'>
@@ -98,12 +156,12 @@ export default function MyPage() {
                 </div>
                 <div>
                   <label className='text-sm text-gray-500'>레벨</label>
-                  <p className='text-lg font-medium'>{userLevel.level}</p>
+                  <p className='text-lg font-medium'>{userLevel?.level || 1}</p>
                 </div>
                 <div>
                   <label className='text-sm text-gray-500'>경험치</label>
                   <p className='text-lg font-medium'>
-                    {userLevel.experience_points}
+                    {userLevel?.experience_points || 0}
                   </p>
                 </div>
               </div>

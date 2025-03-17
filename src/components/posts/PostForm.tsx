@@ -1,80 +1,137 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createPost, updatePost } from "@/services/posts";
 
-// 게시글 폼 속성 정의
-export interface PostFormProps {
-  initialTitle?: string;
-  initialContent?: string;
+// PostForm이 두 가지 모드로 동작할 수 있도록 인터페이스 확장
+interface PostFormProps {
+  // 모드 1: 글 작성/수정 페이지에서 상태 관리
+  onSubmit?: (e: React.FormEvent) => Promise<void>;
+  handleSubmit?: (e: React.FormEvent) => Promise<void>;
+  onTitleChange?: (newTitle: string) => void;
+  onContentChange?: (newContent: string) => void;
+  title?: string;
+  content?: string;
+  isSubmitting?: boolean;
+
+  // 모드 2: 게시글 수정 페이지에서 사용
   isEdit?: boolean;
   postId?: string;
-  onComplete?: () => void;
+  initialTitle?: string;
+  initialContent?: string;
+  onComplete?: () => Promise<void>;
 }
 
 export function PostForm({
+  // 모드 1 props
+  onSubmit,
+  handleSubmit,
+  onTitleChange,
+  onContentChange,
+  title: externalTitle,
+  content: externalContent,
+  isSubmitting = false,
+
+  // 모드 2 props
+  isEdit = false,
+  postId,
   initialTitle = "",
   initialContent = "",
-  isEdit = false,
-  postId = "",
   onComplete,
 }: PostFormProps) {
   const router = useRouter();
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalTitle, setInternalTitle] = useState(initialTitle);
+  const [internalContent, setInternalContent] = useState(initialContent);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // 폼 제출 처리
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // 유효성 검증
-    if (!title.trim()) {
-      setError("제목을 입력해주세요.");
-      return;
+  // 초기값 설정 (수정 모드일 때)
+  useEffect(() => {
+    if (isEdit) {
+      setInternalTitle(initialTitle);
+      setInternalContent(initialContent);
     }
+  }, [isEdit, initialTitle, initialContent]);
 
-    if (!content.trim()) {
-      setError("내용을 입력해주세요.");
-      return;
-    }
+  // 어떤 모드인지 결정
+  const isExternalMode = !isEdit && onTitleChange !== undefined;
 
-    setIsLoading(true);
-    setError("");
+  // 실제 사용할 제목과 내용 값
+  const title = isExternalMode ? externalTitle : internalTitle;
+  const content = isExternalMode ? externalContent : internalContent;
 
-    try {
-      // Supabase를 사용한 게시글 저장
-      if (isEdit && postId) {
-        // 게시글 수정
-        await updatePost(postId, title, content);
-      } else {
-        // 게시글 작성
-        await createPost(title, content);
-      }
-
-      // 폼 제출 완료 후 콜백 호출 또는 목록 페이지로 이동
-      if (onComplete) {
-        onComplete();
-      } else {
-        router.push("/posts");
-      }
-    } catch (err) {
-      console.error("게시글 저장 오류:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("게시글을 저장하는 중 오류가 발생했습니다.");
-      }
-    } finally {
-      setIsLoading(false);
+  // 제목 변경 핸들러
+  const handleTitleChange = (newTitle: string) => {
+    if (isExternalMode && onTitleChange) {
+      onTitleChange(newTitle);
+    } else {
+      setInternalTitle(newTitle);
     }
   };
 
+  // 내용 변경 핸들러
+  const handleContentChange = (newContent: string) => {
+    if (isExternalMode && onContentChange) {
+      onContentChange(newContent);
+    } else {
+      setInternalContent(newContent);
+    }
+  };
+
+  // 폼 제출 핸들러
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isExternalMode) {
+      // 유효성 검증
+      if (!title.trim()) {
+        setError("제목을 입력해주세요.");
+        return;
+      }
+
+      if (!content.trim()) {
+        setError("내용을 입력해주세요.");
+        return;
+      }
+
+      setIsSaving(true);
+      setError("");
+
+      try {
+        // 모드 1: 외부에서 관리하는 제출 핸들러 사용
+        const submitHandler = onSubmit || handleSubmit;
+        if (submitHandler) await submitHandler(e);
+      } catch (err) {
+        console.error("게시글 저장 오류:", err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("게시글을 저장하는 중 오류가 발생했습니다.");
+        }
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      // 모드 2: 내부 로직으로 처리
+      try {
+        setIsSaving(true);
+        if (onComplete) await onComplete();
+      } catch (err) {
+        console.error("게시글 저장 오류:", err);
+        alert("게시글을 저장하는 중 오류가 발생했습니다.");
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  // 현재 처리 중인지 여부
+  const isProcessing = isExternalMode ? isSubmitting : isSaving;
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleFormSubmit}>
       {/* 오류 메시지 */}
       {error && (
         <div
@@ -97,14 +154,15 @@ export function PostForm({
           id='title'
           type='text'
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           className='w-full p-2'
           style={{
             border: "var(--inset-border)",
             backgroundColor: "white",
           }}
           placeholder='제목을 입력하세요'
-          disabled={isLoading}
+          disabled={isProcessing}
+          required
         />
       </div>
 
@@ -116,7 +174,7 @@ export function PostForm({
         <textarea
           id='content'
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => handleContentChange(e.target.value)}
           rows={10}
           className='w-full p-2'
           style={{
@@ -126,7 +184,8 @@ export function PostForm({
             resize: "vertical",
           }}
           placeholder='내용을 입력하세요'
-          disabled={isLoading}
+          disabled={isProcessing}
+          required
         />
       </div>
 
@@ -137,7 +196,7 @@ export function PostForm({
             type='button'
             className='button'
             style={{ border: "var(--outset-border)" }}
-            disabled={isLoading}
+            disabled={isProcessing}
           >
             취소
           </button>
@@ -147,15 +206,9 @@ export function PostForm({
           type='submit'
           className='button'
           style={{ border: "var(--outset-border)" }}
-          disabled={isLoading}
+          disabled={isProcessing}
         >
-          {isLoading
-            ? isEdit
-              ? "수정 중..."
-              : "저장 중..."
-            : isEdit
-            ? "수정 완료"
-            : "게시하기"}
+          {isProcessing ? "저장 중..." : isEdit ? "수정 완료" : "게시글 등록"}
         </button>
       </div>
     </form>

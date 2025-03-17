@@ -11,10 +11,10 @@ export default function Help() {
           </div>
         </div>
         <div className='window-content'>
-          <h1 className='text-xl bold mb-4'>카이로스 이용 가이드</h1>
+          <h1 className='text-xl bold mb-4'>워터베어러 이용 가이드</h1>
           <div className='p-4' style={{ border: "var(--inset-border)" }}>
             <p className='mb-4 text-sm'>
-              카이로스를 시작하는 데 도움이 필요하신가요? 아래 가이드를 참고해
+              워터베어러를 시작하는 데 도움이 필요하신가요? 아래 가이드를 참고해
               주세요.
             </p>
 
@@ -23,7 +23,7 @@ export default function Help() {
               <div className='listview-item'>
                 <span className='bold'>🔸 계정 만들기</span>
                 <p className='text-sm'>
-                  카이로스를 시작하려면 먼저 계정을 만들어야 합니다. 이메일
+                  워터베어러를 시작하려면 먼저 계정을 만들어야 합니다. 이메일
                   주소와 비밀번호를 입력하여 간단하게 가입할 수 있습니다.
                 </p>
               </div>
@@ -67,10 +67,10 @@ export default function Help() {
             <h2 className='bold mb-2'>자주 묻는 질문</h2>
             <div className='p-3 mb-2' style={{ border: "var(--inset-border)" }}>
               <h3 className='bold text-sm mb-1'>
-                Q: 카이로스의 모든 기능은 무료인가요?
+                Q: 워터베어러의 모든 기능은 무료인가요?
               </h3>
               <p className='text-sm'>
-                A: 카이로스의 기본 기능은 무료로 제공됩니다. 다만, 추가 저장
+                A: 워터베어러의 기본 기능은 무료로 제공됩니다. 다만, 추가 저장
                 공간이나 고급 기능은 유료 구독을 통해 이용하실 수 있습니다.
               </p>
             </div>

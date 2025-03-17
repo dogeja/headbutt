@@ -11,31 +11,32 @@ export default function FAQ() {
           </div>
         </div>
         <div className='window-content'>
-          <h1 className='text-xl bold mb-4'>카이로스 FAQ</h1>
+          <h1 className='text-xl bold mb-4'>워터베어러 FAQ</h1>
           <div className='p-4' style={{ border: "var(--inset-border)" }}>
             <p className='mb-4 text-sm'>
-              카이로스를 이용하시면서 자주 물어보시는 질문들에 대한 답변을
+              워터베어러를 이용하시면서 자주 물어보시는 질문들에 대한 답변을
               모았습니다.
             </p>
 
             <h2 className='bold mb-2'>서비스 이용</h2>
             <div className='p-3 mb-4' style={{ border: "var(--inset-border)" }}>
               <h3 className='bold text-sm mb-1'>
-                Q: 카이로스는 어떤 서비스인가요?
+                Q: 워터베어러는 어떤 서비스인가요?
               </h3>
               <p className='text-sm'>
-                A: 카이로스는 삶의 결정적 순간을 기록하고 의미를 부여할 수 있는
-                서비스입니다. 일상에서 지나치기 쉬운 소중한 순간들을 포착하고 그
-                가치를 높이는 도구를 제공합니다.
+                A: 워터베어러는 지속가능한 생산성과 의미 있는 성취를 돕는
+                서비스입니다. 일상의 작은 노력이 모여 큰 변화를 만들 수 있도록
+                도와드립니다.
               </p>
             </div>
             <div className='p-3 mb-4' style={{ border: "var(--inset-border)" }}>
               <h3 className='bold text-sm mb-1'>
-                Q: 카이로스를 무료로 이용할 수 있나요?
+                Q: 워터베어러를 무료로 이용할 수 있나요?
               </h3>
               <p className='text-sm'>
-                A: 네, 카이로스의 기본 기능은 무료로 이용하실 수 있습니다. 다만
-                추가 저장 공간이나 고급 기능은 유료 구독을 통해 이용 가능합니다.
+                A: 네, 워터베어러의 기본 기능은 무료로 이용하실 수 있습니다.
+                다만 추가 저장 공간이나 고급 기능은 유료 구독을 통해 이용
+                가능합니다.
               </p>
             </div>
             <div className='p-3 mb-4' style={{ border: "var(--inset-border)" }}>

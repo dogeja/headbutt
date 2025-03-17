@@ -53,7 +53,7 @@ export default function Work() {
         <div className='window-content'>
           <h1 className='text-xl bold mb-4'>앱 개발 중!</h1>
           <p className='text-sm mb-4'>
-            여러분의 소중한 순간을 더 쉽게 기록하고 의미를 더할 수 있는 앱을
+            여러분의 지속가능한 성장과 의미 있는 노력을 돕는 워터베어러 앱을
             개발 중입니다.
           </p>
 
@@ -68,9 +68,9 @@ export default function Work() {
 
                 <FeatureBox title='개발 중인 주요 기능'>
                   <ul className='text-sm space-y-2'>
-                    <li>• 습관 기강잡기 앱</li>
-                    <li>• 헬스장 출석 앱</li>
-                    <li>• 메모로 나무심기, 도토리</li>
+                    <li>• 지속가능한 습관 형성 도구</li>
+                    <li>• 내적 통제력 향상 트래커</li>
+                    <li>• 의미 있는 노력 기록 시스템</li>
                   </ul>
                 </FeatureBox>
               </div>

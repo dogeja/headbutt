@@ -79,6 +79,23 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --retro-font: "IBM Plex Mono", "Courier New", monospace;
+  --pixel-font: "VT323", monospace;
+  --game-font: "Press Start 2P", cursive;
+  --win98-bg: #c0c0c0;
+  --win98-window: #d4d0c8;
+  --win98-header: #000080;
+  --win98-header-text: #ffffff;
+  --win98-border: #808080;
+  --win98-button: #d4d0c8;
+  --window-background: #ffffff;
+  --button-face: #c0c0c0;
+  --button-shadow: #808080;
+  --button-highlight: #ffffff;
+  --outset-border: 2px outset #c0c0c0;
+  --inset-border: 2px inset #c0c0c0;
+  --border-color: #808080;
+  --font-system: "VT323", monospace;
 }
 
 .dark {
@@ -122,5 +139,170 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-system);
+    background-color: #008080; /* 윈도우 98 배경색 */
+    margin: 0;
+    padding: 0;
+  }
+}
+
+h1,
+h2,
+h3,
+.window-header {
+  font-family: var(--retro-font);
+}
+
+.logo,
+.brand-logo {
+  font-family: var(--pixel-font);
+  font-size: 1.5rem;
+  color: var(--win98-header);
+  text-decoration: none;
+}
+
+.window {
+  border: var(--outset-border);
+  background-color: var(--button-face);
+  box-shadow: 1px 1px 0 white inset, -1px -1px 0 #707070 inset,
+    2px 2px 10px rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - 5rem);
+}
+
+.window-header {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  padding: 3px 6px;
+  font-family: var(--font-system);
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.button,
+button {
+  font-family: var(--retro-font);
+  background-color: var(--win98-button);
+  border: 2px outset #ffffff;
+  padding: 2px 6px;
+}
+
+.button:active,
+button:active {
+  border: 2px inset #ffffff;
+}
+
+.main-navigation {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: var(--win98-button);
+  border-bottom: 1px solid var(--win98-border);
+}
+
+.nav-menu li {
+  padding: 0.5rem 1rem;
+}
+
+.nav-menu li.active {
+  background-color: #efefef;
+  border-bottom: 2px solid var(--win98-header);
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #000000;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: var(--win98-window);
+  border-bottom: 1px solid var(--win98-border);
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.tagline {
+  font-size: 0.75rem;
+  color: #808080;
+  margin: 0;
+}
+
+.auth-links,
+.user-menu {
+  display: flex;
+  gap: 1rem;
+}
+
+.auth-links a,
+.user-menu a,
+.user-menu button {
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+/* 복고풍 버튼 스타일 */
+.button-3d {
+  border: var(--outset-border);
+  background: var(--button-face);
+  box-shadow: 1px 1px 0 white inset, -1px -1px 0 #707070 inset;
+  transition: all 0.05s;
+}
+
+.button-3d:active {
+  border: var(--inset-border);
+  box-shadow: -1px -1px 0 white inset, 1px 1px 0 #707070 inset;
+  transform: translate(1px, 1px);
+}
+
+/* 테이블 스타일 */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: var(--outset-border);
+}
+
+th {
+  background-color: var(--button-face);
+  font-weight: bold;
+  padding: 0.5rem;
+}
+
+td {
+  padding: 0.5rem;
+}
+
+/* 링크 스타일 */
+a {
+  color: #0000ff;
+}
+
+a:visited {
+  color: #800080;
+}
+
+/* 모바일 조정 */
+@media (max-width: 768px) {
+  main {
+    padding: 0.5rem;
+    padding-bottom: 4rem;
+  }
+
+  .window {
+    min-height: calc(100vh - 5.5rem);
   }
 }

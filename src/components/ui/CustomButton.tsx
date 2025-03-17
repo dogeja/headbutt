@@ -12,7 +12,7 @@ export interface ButtonProps
   children: React.ReactNode;
 }
 
-export function Button({
+export function CustomButton({
   variant = "primary",
   size = "md",
   fullWidth = false,
@@ -24,21 +24,18 @@ export function Button({
 }: ButtonProps) {
   const [isActive, setIsActive] = useState(false);
 
-  // 사이즈별 패딩
   const sizeClasses = {
     sm: "px-2 py-1 text-sm",
     md: "px-3 py-1.5",
     lg: "px-4 py-2 text-lg",
   };
 
-  // 컬러 변형
   const variantClasses = {
     primary: "bg-[var(--button-face)]",
     secondary: "bg-[#e0e0e0]",
     danger: "bg-[#ff9999]",
   };
 
-  // 활성화/비활성화 스타일
   const baseStyle = {
     border: isActive ? "var(--inset-border)" : "var(--outset-border)",
     boxShadow: isActive
