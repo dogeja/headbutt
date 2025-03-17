@@ -59,8 +59,8 @@ export function PostForm({
   const isExternalMode = !isEdit && onTitleChange !== undefined;
 
   // 실제 사용할 제목과 내용 값
-  const title = isExternalMode ? externalTitle : internalTitle;
-  const content = isExternalMode ? externalContent : internalContent;
+  const title = isExternalMode ? externalTitle || "" : internalTitle;
+  const content = isExternalMode ? externalContent || "" : internalContent;
 
   // 제목 변경 핸들러
   const handleTitleChange = (newTitle: string) => {

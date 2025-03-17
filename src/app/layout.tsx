@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import type { Metadata } from "next";
 import { Inter, VT323 } from "next/font/google";
 import Taskbar from "@/components/layout/Taskbar";
+import { cn } from "@/lib/utils";
 
 // 기본 글꼴 및 복고풍 글꼴 불러오기
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -39,7 +40,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${vt323.variable} font-sans`}
+        className={cn(
+          "flex flex-col min-h-screen bg-background font-sans antialiased",
+          inter.variable,
+          vt323.variable
+        )}
         style={{ backgroundColor: "#008080" }}
       >
         <main className='container mx-auto p-4 pb-16'>
