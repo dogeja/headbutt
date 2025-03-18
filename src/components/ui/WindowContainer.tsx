@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 
 interface WindowContainerProps {
   title: string;
@@ -21,6 +22,13 @@ export function WindowContainer({
   children,
   maxWidth = "md",
 }: WindowContainerProps) {
+  const pathname = usePathname();
+
+  // /auth/login 페이지에서 WindowContainer 자체를 렌더링하지 않음
+  if (pathname === "/auth/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className={`window mx-auto mt-10 ${maxWidthMap[maxWidth]}`}>
       <div className='window-header'>
