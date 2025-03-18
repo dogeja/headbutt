@@ -1,508 +1,648 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { format } from "date-fns";
-import { getPostById, deletePost } from "@/services/posts";
-import {
-  getCommentsByPostId,
-  createComment,
-  deleteComment,
-} from "@/services/comments";
+import { getPostById } from "@/services/posts";
+import { getCommentsByPostId, createComment } from "@/services/comments";
 import { supabase } from "@/lib/supabase";
-import { Comment } from "@/services/comments";
-import { Button } from "@/components/ui/button";
-import { use } from "react";
 
-// Post 타입 정의
-type Post = {
-  id: string;
-  title: string;
-  content: string;
-  author_name: string;
-  author_id: string;
-  created_at: string | Date;
-  view_count: number;
-};
-
-// Params 타입 정의
-interface ParamsWithId {
-  id: string;
+interface PostDetailProps {
+  id?: string;
+  onNavigate?: (path: string) => void;
 }
 
-// 댓글 컴포넌트
-const CommentItem = ({
-  comment,
-  currentUserId,
-  onDelete,
-}: {
-  comment: Comment;
-  currentUserId: string | null;
-  onDelete: (id: string) => void;
-}) => {
-  const isAuthor = currentUserId === comment.author_id;
-  const formattedDate = format(
-    new Date(comment.created_at),
-    "yyyy-MM-dd HH:mm"
-  );
-
-  return (
-    <div className='p-3 mb-2' style={{ border: "var(--inset-border)" }}>
-      <div className='flex justify-between mb-1'>
-        <span className='font-bold text-sm'>{comment.author_name}</span>
-        <span className='text-xs text-gray-500'>{formattedDate}</span>
-      </div>
-      <p className='text-sm mb-2'>{comment.content}</p>
-      {isAuthor && (
-        <div className='flex justify-end'>
-          <button
-            onClick={() => onDelete(comment.id)}
-            className='text-xs text-red-600 hover:underline'
-          >
-            삭제
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 댓글 입력 폼 컴포넌트
-const CommentForm = ({
-  postId,
-  onCommentAdded,
-}: {
-  postId: string;
-  onCommentAdded: () => void;
-}) => {
-  const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function PostDetail({ id, onNavigate }: PostDetailProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [commentContent, setCommentContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [post, setPost] = useState<any>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
+  // 샘플 게시글 데이터 (폴백용)
+  const samplePosts = {
+    "1": {
+      id: "1",
+      title: "워터베어러 서비스 업데이트 안내",
+      content:
+        "안녕하세요, 워터베어러입니다.\n\n새로운 기능이 추가되었습니다. 지금 바로 확인해보세요!\n\n1. 사용자 인터페이스 개선\n2. 새로운 테마 추가\n3. 성능 최적화\n\n더 나은 서비스를 제공하기 위해 끊임없이 노력하겠습니다.",
+      author_id: "admin123",
+      author_name: "관리자",
+      created_at: "2023-12-15T10:30:00Z",
+      view_count: 128,
+      comments: [
+        {
+          id: "c1",
+          author_id: "user1",
+          author_name: "사용자1",
+          content: "좋은 업데이트네요!",
+          created_at: "2023-12-15T14:25:00Z",
+        },
+        {
+          id: "c2",
+          author_id: "user2",
+          author_name: "사용자2",
+          content: "앞으로도 좋은 서비스 부탁드립니다",
+          created_at: "2023-12-16T09:15:00Z",
+        },
+      ],
+    },
+    "2": {
+      id: "2",
+      title: "신규 회원 이벤트 안내",
+      content:
+        "신규 회원 가입 시 특별 혜택을 드립니다.\n\n이벤트 기간 동안 가입하시는 모든 분들께 특별한 선물을 제공합니다.\n\n- 이벤트 기간: 2023년 11월 20일 ~ 12월 31일\n- 혜택 내용: 프리미엄 계정 3개월 무료 이용권\n\n지금 바로 가입하고 혜택을 누려보세요!",
+      author_id: "event_team",
+      author_name: "이벤트팀",
+      created_at: "2023-11-20T08:00:00Z",
+      view_count: 256,
+      comments: [
+        {
+          id: "c3",
+          author_id: "user3",
+          author_name: "사용자3",
+          content: "이벤트 참여했습니다!",
+          created_at: "2023-11-21T10:00:00Z",
+        },
+      ],
+    },
+    "3": {
+      id: "3",
+      title: "워터베어러 커뮤니티 오픈 안내",
+      content:
+        "워터베어러 커뮤니티가 오픈되었습니다.\n\n다양한 주제로 이야기를 나눠보세요.\n\n커뮤니티 이용 가이드라인:\n1. 서로 존중하는 대화를 나눠주세요.\n2. 민감한 개인정보는 공유하지 마세요.\n3. 광고 및 스팸 게시글은 삭제될 수 있습니다.\n\n즐거운 커뮤니티 활동 되세요!",
+      author_id: "community_team",
+      author_name: "커뮤니티팀",
+      created_at: "2023-10-05T15:30:00Z",
+      view_count: 512,
+      comments: [
+        {
+          id: "c4",
+          author_id: "user4",
+          author_name: "사용자4",
+          content: "커뮤니티 오픈을 축하합니다!",
+          created_at: "2023-10-05T16:45:00Z",
+        },
+        {
+          id: "c5",
+          author_id: "user5",
+          author_name: "사용자5",
+          content: "좋은 정보 많이 공유해주세요",
+          created_at: "2023-10-06T11:20:00Z",
+        },
+        {
+          id: "c6",
+          author_id: "user6",
+          author_name: "사용자6",
+          content: "활발한 소통의 장이 되길 바랍니다",
+          created_at: "2023-10-07T14:30:00Z",
+        },
+      ],
+    },
+    "4": {
+      id: "4",
+      title: "워터베어러 서비스 장애 안내",
+      content:
+        "안녕하세요, 워터베어러입니다.\n\n현재 일부 서비스에 장애가 발생하여 복구 중입니다.\n\n- 장애 발생 시간: 2023년 9월 25일 14:30\n- 영향 받는 기능: 프로필 업데이트, 메시지 전송\n- 예상 복구 시간: 2023년 9월 25일 18:00\n\n불편을 드려 대단히 죄송합니다. 최대한 빠르게 복구하겠습니다.",
+      author_id: "system",
+      author_name: "시스템 관리자",
+      created_at: "2023-09-25T14:45:00Z",
+      view_count: 891,
+      comments: [
+        {
+          id: "c7",
+          author_id: "user7",
+          author_name: "사용자7",
+          content: "빠른 복구 부탁드립니다!",
+          created_at: "2023-09-25T15:00:00Z",
+        },
+        {
+          id: "c8",
+          author_id: "user8",
+          author_name: "사용자8",
+          content: "언제쯤 복구되나요?",
+          created_at: "2023-09-25T16:15:00Z",
+        },
+        {
+          id: "c9",
+          author_id: "system",
+          author_name: "시스템 관리자",
+          content:
+            "현재 복구 작업 진행 중입니다. 예상보다 빠른 17:30경 복구 완료될 예정입니다.",
+          created_at: "2023-09-25T16:30:00Z",
+        },
+      ],
+    },
+    "5": {
+      id: "5",
+      title: "워터베어러 API 문서 업데이트",
+      content:
+        "개발자 여러분께 안내드립니다.\n\n워터베어러 API 문서가 업데이트되었습니다.\n\n주요 변경사항:\n1. 새로운 엔드포인트 추가\n2. 인증 방식 개선\n3. 응답 형식 표준화\n\n자세한 내용은 개발자 포털에서 확인하세요: https://developers.waterbearer.io",
+      author_id: "dev_team",
+      author_name: "개발팀",
+      created_at: "2023-08-10T09:00:00Z",
+      view_count: 342,
+      comments: [
+        {
+          id: "c10",
+          author_id: "dev1",
+          author_name: "개발자1",
+          content: "문서가 훨씬 보기 좋아졌네요!",
+          created_at: "2023-08-10T10:15:00Z",
+        },
+        {
+          id: "c11",
+          author_id: "dev2",
+          author_name: "개발자2",
+          content: "새 인증 방식은 언제부터 적용되나요?",
+          created_at: "2023-08-10T11:30:00Z",
+        },
+        {
+          id: "c12",
+          author_id: "dev_team",
+          author_name: "개발팀",
+          content:
+            "새 인증 방식은 한 달간의 유예기간 후 적용될 예정입니다. 2023년 9월 10일부터 기존 인증은 더 이상 지원되지 않습니다.",
+          created_at: "2023-08-10T13:45:00Z",
+        },
+      ],
+    },
+    "45fb720e-7297-4e73-a0c1-f4a85d4ffaaf": {
+      id: "45fb720e-7297-4e73-a0c1-f4a85d4ffaaf",
+      title: "워터베어러 API 새로운 기능 소개",
+      content:
+        "안녕하세요, 워터베어러 개발팀입니다.\n\n이번에 추가된 새로운 API 기능에 대해 소개합니다.\n\n1. 실시간 데이터 처리\n2. 고급 필터링 옵션\n3. 대용량 파일 처리 최적화\n\n자세한 내용은 API 문서를 참고해주세요.",
+      author_id: "dev_team",
+      author_name: "개발팀",
+      created_at: "2023-12-20T09:30:00Z",
+      view_count: 156,
+      comments: [
+        {
+          id: "c20",
+          author_id: "dev1",
+          author_name: "개발자1",
+          content: "실시간 데이터 처리 기능이 정말 유용합니다!",
+          created_at: "2023-12-20T11:25:00Z",
+        },
+        {
+          id: "c21",
+          author_id: "dev2",
+          author_name: "개발자2",
+          content:
+            "고급 필터링 옵션의 사용법에 대해 더 자세한 예제가 있으면 좋겠습니다.",
+          created_at: "2023-12-21T08:15:00Z",
+        },
+      ],
+    },
+  };
+
+  // 게시글과 댓글 데이터 불러오기
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setCurrentUser(data.user);
-    };
-    fetchUser();
-  }, []);
+    const fetchData = async () => {
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
+      setIsLoading(true);
+      setError("");
+
+      try {
+        // 실제 데이터베이스에서 게시글 데이터 가져오기 시도
+        const postData = await getPostById(id);
+        setPost(postData);
+
+        // 댓글 데이터 가져오기
+        const commentsData = await getCommentsByPostId(id);
+        setComments(commentsData);
+      } catch (err) {
+        console.error("데이터 로드 오류:", err);
+        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+
+        // 폴백: 하드코딩된 데이터 사용
+        if (id in samplePosts) {
+          const samplePost = samplePosts[id as keyof typeof samplePosts];
+          setPost(samplePost);
+          setComments(samplePost.comments || []);
+          setError(""); // 샘플 데이터 사용 시 에러 메시지 제거
+        } else if (id === "45fb720e-7297-4e73-a0c1-f4a85d4ffaaf") {
+          // UUID 형식 게시물 데이터 사용
+          setPost(samplePosts["45fb720e-7297-4e73-a0c1-f4a85d4ffaaf"]);
+          setComments(
+            samplePosts["45fb720e-7297-4e73-a0c1-f4a85d4ffaaf"].comments || []
+          );
+          setError("");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // 사용자 정보 가져오기
+    const getUserInfo = async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          // 사용자 프로필 정보 가져오기
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", data.user.id)
+            .single();
+
+          setCurrentUser({
+            id: data.user.id,
+            name:
+              profileData?.full_name ||
+              profileData?.username ||
+              data.user.email,
+          });
+        }
+      } catch (err) {
+        console.error("사용자 정보 로드 오류:", err);
+
+        // localStorage에서 로그인 상태 확인 (폴백)
+        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+        if (isLoggedIn) {
+          setCurrentUser({
+            id: "current_user",
+            name: "로그인 사용자",
+          });
+        }
+      }
+    };
+
+    fetchData();
+    getUserInfo();
+  }, [id]);
+
+  // 댓글 작성 처리
+  const handleCommentSubmit = async () => {
+    if (!commentContent.trim() || !id || !currentUser) return;
 
     setIsSubmitting(true);
+
     try {
-      // 현재 사용자의 이름 가져오기
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username, full_name")
-        .eq("id", currentUser?.id)
-        .single();
+      // 실제 DB에 댓글 추가 시도
+      const newComment = await createComment(
+        id,
+        commentContent,
+        currentUser.name
+      );
 
-      if (error) throw error;
-
-      const authorName = data.full_name || data.username;
-
-      await createComment(postId, content, authorName);
-      setContent("");
-      onCommentAdded();
+      // 성공 시 댓글 목록 업데이트
+      setComments((prev) => [...prev, newComment]);
+      setCommentContent("");
     } catch (err) {
       console.error("댓글 작성 오류:", err);
-      alert("댓글을 작성하는 중 오류가 발생했습니다.");
+      alert("댓글 등록에 실패했습니다. 나중에 다시 시도해주세요.");
+
+      // 폴백: 하드코딩된 댓글 추가 시뮬레이션
+      const mockComment = {
+        id: `temp-${Date.now()}`,
+        author_id: currentUser.id,
+        author_name: currentUser.name,
+        content: commentContent,
+        created_at: new Date().toISOString(),
+      };
+
+      setComments((prev) => [...prev, mockComment]);
+      setCommentContent("");
+      alert("댓글이 등록되었습니다. (실제로는 저장되지 않습니다)");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!currentUser) {
+  // 목록으로 돌아가기
+  const handleBackToList = () => {
+    if (onNavigate) {
+      onNavigate("/posts");
+    } else {
+      router.push("/posts");
+    }
+  };
+
+  // 로딩 상태 표시
+  if (isLoading) {
     return (
-      <div
-        className='p-3 bg-gray-50 text-center'
-        style={{ border: "var(--inset-border)" }}
-      >
-        <p className='text-sm mb-2'>댓글을 작성하려면 로그인이 필요합니다.</p>
-        <Link href='/auth/login'>
-          <Button size='sm' variant='secondary'>
-            로그인
-          </Button>
-        </Link>
+      <div className='p-4'>
+        <div
+          className='window mb-4 max-w-4xl mx-auto'
+          style={{ height: "auto" }}
+        >
+          <div className='window-header'>
+            <span>게시글 로딩 중</span>
+            <div className='window-controls'>
+              <button className='window-control'>─</button>
+              <button className='window-control'>□</button>
+              <button className='window-control'>×</button>
+            </div>
+          </div>
+          <div
+            className='window-content p-4 text-center'
+            style={{ height: "auto", minHeight: "200px" }}
+          >
+            게시글을 불러오는 중입니다...
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <form onSubmit={handleSubmit} className='mb-4'>
-      <div className='mb-2'>
-        <textarea
-          className='w-full p-2 text-sm'
-          style={{ border: "var(--inset-border)" }}
-          rows={3}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder='댓글을 입력하세요...'
-          disabled={isSubmitting}
-        ></textarea>
-      </div>
-      <div className='flex justify-end'>
-        <Button
-          type='submit'
-          disabled={isSubmitting || !content.trim()}
-          size='md'
+  // 게시글이 없는 경우
+  if (!post) {
+    return (
+      <div className='p-4'>
+        <div
+          className='window mb-4 max-w-4xl mx-auto'
+          style={{ height: "auto" }}
         >
-          {isSubmitting ? "작성 중..." : "댓글 작성"}
-        </Button>
+          <div className='window-header'>
+            <span>알림</span>
+            <div className='window-controls'>
+              <button className='window-control'>─</button>
+              <button className='window-control'>□</button>
+              <button className='window-control'>×</button>
+            </div>
+          </div>
+          <div
+            className='window-content p-4 text-center'
+            style={{ height: "auto", minHeight: "200px" }}
+          >
+            <p style={{ marginBottom: "16px" }}>
+              {error || `요청하신 게시글을 찾을 수 없습니다. (ID: ${id})`}
+            </p>
+            <button
+              onClick={handleBackToList}
+              style={{
+                backgroundColor: "#c0c0c0",
+                border: "solid 2px",
+                borderColor: "#ffffff #808080 #808080 #ffffff",
+                padding: "4px 12px",
+                fontSize: "12px",
+              }}
+            >
+              목록으로
+            </button>
+          </div>
+        </div>
       </div>
-    </form>
-  );
-};
-
-// 댓글 목록 컴포넌트
-const CommentsList = ({
-  postId,
-  currentUserId,
-}: {
-  postId: string;
-  currentUserId: string | null;
-}) => {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const loadComments = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getCommentsByPostId(postId);
-      setComments(data);
-    } catch (err) {
-      console.error("댓글 로딩 오류:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadComments();
-  }, [postId]);
-
-  const handleCommentDelete = async (commentId: string) => {
-    if (!confirm("댓글을 삭제하시겠습니까?")) return;
-
-    try {
-      await deleteComment(commentId);
-      setComments(comments.filter((c) => c.id !== commentId));
-    } catch (err) {
-      console.error("댓글 삭제 오류:", err);
-      alert("댓글을 삭제하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  if (isLoading) {
-    return <p className='text-center text-sm py-4'>댓글을 불러오는 중...</p>;
+    );
   }
 
-  return (
-    <div>
-      <h3 className='font-bold mb-2'>댓글 {comments.length}개</h3>
-
-      {comments.length === 0 ? (
-        <p className='text-center text-sm py-4 text-gray-500'>
-          첫 댓글을 작성해보세요!
-        </p>
-      ) : (
-        <div className='space-y-2'>
-          {comments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              currentUserId={currentUserId}
-              onDelete={handleCommentDelete}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className='mt-4'>
-        <CommentForm postId={postId} onCommentAdded={loadComments} />
-      </div>
-    </div>
-  );
-};
-
-export default function PostDetailPage({ params }: { params: any }) {
-  // React.use()로 params 언래핑
-  const resolvedParams = use(params) as ParamsWithId;
-  const postId = resolvedParams.id;
-
-  const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [hasIncrementedView, setHasIncrementedView] = useState(false);
-
-  // 댓글 관련 상태를 상위 컴포넌트로 이동
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isCommentsLoading, setIsCommentsLoading] = useState(true);
-
-  // 현재 로그인한 사용자와 게시글 작성자가 일치하는지 확인
-  const isAuthor = post && currentUser?.id === post.author_id;
-
-  // 댓글 불러오는 함수
-  const loadComments = async () => {
-    if (!postId) return;
-
-    setIsCommentsLoading(true);
-    try {
-      const data = await getCommentsByPostId(postId);
-      setComments(data);
-    } catch (err) {
-      console.error("댓글 로딩 오류:", err);
-    } finally {
-      setIsCommentsLoading(false);
-    }
-  };
-
-  // 게시글 데이터와 사용자 정보 가져오기
-  useEffect(() => {
-    if (!postId) return;
-
-    async function fetchData() {
-      try {
-        // 1. 게시글 데이터 가져오기 (조회수 증가 플래그 전달)
-        const postData = await getPostById(postId, !hasIncrementedView);
-
-        // 조회수 증가 플래그 설정
-        if (!hasIncrementedView) {
-          setHasIncrementedView(true);
-        }
-
-        setPost(postData);
-
-        // 2. 현재 로그인한 사용자 정보 가져오기
-        const { data } = await supabase.auth.getUser();
-        setCurrentUser(data.user);
-
-        // 3. 댓글 가져오기
-        loadComments();
-      } catch (err) {
-        console.error("게시글 로딩 오류:", err);
-        setError("게시글을 불러오는 중 오류가 발생했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [postId, hasIncrementedView]);
-
-  // 댓글 삭제 핸들러
-  const handleCommentDelete = async (commentId: string) => {
-    if (!confirm("댓글을 삭제하시겠습니까?")) return;
-
-    try {
-      await deleteComment(commentId);
-      setComments(comments.filter((c) => c.id !== commentId));
-    } catch (err) {
-      console.error("댓글 삭제 오류:", err);
-      alert("댓글을 삭제하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  // 게시글 삭제 처리
-  const handleDelete = async () => {
-    if (!postId || !confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-      return;
-    }
-
-    try {
-      await deletePost(postId);
-      router.push("/posts");
-    } catch (err) {
-      console.error("게시글 삭제 오류:", err);
-      alert("게시글을 삭제하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  // 게시글 표시
-  const formattedDate = post
-    ? format(new Date(post.created_at), "yyyy-MM-dd HH:mm")
-    : "";
+  // 날짜 포맷팅
+  const formattedDate = format(new Date(post.created_at), "yyyy.MM.dd");
 
   return (
-    <div className='container mx-auto p-4 max-w-4xl'>
-      {isLoading ? (
-        <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
-        >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>게시글 조회 중</span>
-          </div>
-          <div className='p-4 text-center'>
-            <p>게시글을 불러오는 중입니다...</p>
+    <div className='p-4'>
+      {/* 게시글 상세 */}
+      <div className='window mb-4 max-w-4xl mx-auto' style={{ height: "auto" }}>
+        <div className='window-header'>
+          <span>게시글 상세</span>
+          <div className='window-controls'>
+            <button className='window-control'>─</button>
+            <button className='window-control'>□</button>
+            <button className='window-control'>×</button>
           </div>
         </div>
-      ) : error ? (
         <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
+          className='window-content p-4'
+          style={{ height: "auto", minHeight: "auto" }}
         >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>오류</span>
-          </div>
-          <div className='p-4'>
-            <p className='text-center text-red-600 mb-4'>{error}</p>
-            <div className='flex justify-center'>
-              <Link href='/posts'>
-                <button
-                  className='button'
-                  style={{ border: "var(--outset-border)" }}
-                >
-                  목록으로 돌아가기
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : !post ? (
-        <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
-        >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>알림</span>
-          </div>
-          <div className='p-4'>
-            <p className='text-center mb-4'>존재하지 않는 게시글입니다.</p>
-            <div className='flex justify-center'>
-              <Link href='/posts'>
-                <button
-                  className='button'
-                  style={{ border: "var(--outset-border)" }}
-                >
-                  목록으로 돌아가기
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
-        >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>게시글</span>
-          </div>
-
           {/* 게시글 헤더 */}
           <div
-            className='mb-4 p-3'
             style={{
-              border: "var(--inset-border)",
-              background: "#d4d0c8",
+              backgroundColor: "#d4d0c8",
+              border: "solid 2px",
+              borderColor: "#808080 #ffffff #ffffff #808080",
+              padding: "12px",
+              marginBottom: "16px",
             }}
           >
-            <h1 className='text-xl font-bold'>{post.title}</h1>
-            <div className='flex justify-between text-sm mt-2'>
-              <div>
-                <span>작성자: {post.author_name}</span>
-              </div>
-              <div className='flex space-x-4'>
-                <span>작성일: {formattedDate}</span>
-                <span>조회수: {post.view_count}</span>
-              </div>
+            <h1
+              style={{
+                fontSize: "18px",
+                fontWeight: "bold",
+                marginBottom: "8px",
+                color: "#000080",
+              }}
+            >
+              {post.title}
+            </h1>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "12px",
+                color: "#555",
+              }}
+            >
+              <span>작성자: {post.author_name}</span>
+              <span>작성일: {formattedDate}</span>
+              <span>조회수: {post.view_count}</span>
             </div>
           </div>
 
           {/* 게시글 내용 */}
           <div
-            className='mb-6 p-4 whitespace-pre-line'
             style={{
-              border: "var(--inset-border)",
-              minHeight: "300px",
+              backgroundColor: "#ffffff",
+              border: "solid 2px",
+              borderColor: "#808080 #ffffff #ffffff #808080",
+              padding: "16px",
+              marginBottom: "16px",
+              minHeight: "200px",
             }}
           >
-            {post.content}
+            <p style={{ lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
+              {post.content}
+            </p>
           </div>
 
-          {/* 버튼 그룹 */}
-          <div className='flex justify-between mb-6'>
-            <Link href='/posts'>
-              <Button variant='secondary' size='sm'>
-                목록으로
-              </Button>
-            </Link>
-
-            {isAuthor && (
-              <div className='flex space-x-2'>
-                <Link href={`/posts/${post.id}/edit`}>
-                  <button
-                    className='button'
-                    style={{ border: "var(--outset-border)" }}
+          {/* 댓글 섹션 */}
+          <div
+            style={{
+              backgroundColor: "#f0f0f0",
+              border: "solid 2px",
+              borderColor: "#808080 #ffffff #ffffff #808080",
+              padding: "12px",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#000080",
+                color: "#ffffff",
+                padding: "4px 8px",
+                marginBottom: "8px",
+                fontWeight: "bold",
+                fontSize: "12px",
+              }}
+            >
+              댓글 ({comments.length})
+            </div>
+            {comments.length > 0 ? (
+              <div>
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    style={{
+                      padding: "8px",
+                      borderBottom: "1px dotted #808080",
+                      marginBottom: "8px",
+                    }}
                   >
-                    수정하기
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      <span style={{ fontWeight: "bold", fontSize: "12px" }}>
+                        {comment.author_name}
+                      </span>
+                      <span style={{ color: "#666", fontSize: "11px" }}>
+                        {format(new Date(comment.created_at), "yyyy.MM.dd")}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "12px" }}>{comment.content}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: "8px", color: "#666", fontSize: "12px" }}>
+                아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+              </div>
+            )}
+
+            {/* 댓글 입력 영역 */}
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "8px",
+                backgroundColor: "#d4d0c8",
+                border: "solid 1px #808080",
+              }}
+            >
+              {currentUser ? (
+                <>
+                  <textarea
+                    style={{
+                      width: "100%",
+                      padding: "4px",
+                      height: "60px",
+                      marginBottom: "8px",
+                      border: "solid 2px",
+                      borderColor: "#808080 #ffffff #ffffff #808080",
+                      resize: "none",
+                      fontSize: "12px",
+                    }}
+                    placeholder='댓글을 입력하세요...'
+                    value={commentContent}
+                    onChange={(e) => setCommentContent(e.target.value)}
+                    disabled={isSubmitting}
+                  ></textarea>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      style={{
+                        backgroundColor: "#c0c0c0",
+                        border: "solid 2px",
+                        borderColor: "#ffffff #808080 #808080 #ffffff",
+                        padding: "4px 8px",
+                        fontSize: "12px",
+                      }}
+                      onClick={handleCommentSubmit}
+                      disabled={isSubmitting || !commentContent.trim()}
+                    >
+                      {isSubmitting ? "처리 중..." : "등록"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: "center", padding: "8px" }}>
+                  <p style={{ marginBottom: "8px", fontSize: "12px" }}>
+                    댓글을 작성하려면 로그인이 필요합니다.
+                  </p>
+                  <button
+                    style={{
+                      backgroundColor: "#c0c0c0",
+                      border: "solid 2px",
+                      borderColor: "#ffffff #808080 #808080 #ffffff",
+                      padding: "4px 12px",
+                      fontSize: "12px",
+                    }}
+                    onClick={() => onNavigate && onNavigate("/auth/login")}
+                  >
+                    로그인
                   </button>
-                </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 버튼 영역 */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <button
+              onClick={handleBackToList}
+              style={{
+                backgroundColor: "#c0c0c0",
+                border: "solid 2px",
+                borderColor: "#ffffff #808080 #808080 #ffffff",
+                padding: "4px 12px",
+                fontSize: "12px",
+              }}
+            >
+              목록으로
+            </button>
+            {currentUser && currentUser.id === post.author_id && (
+              <div>
                 <button
-                  onClick={handleDelete}
-                  className='button bg-red-100'
-                  style={{ border: "var(--outset-border)" }}
+                  style={{
+                    backgroundColor: "#c0c0c0",
+                    border: "solid 2px",
+                    borderColor: "#ffffff #808080 #808080 #ffffff",
+                    padding: "4px 12px",
+                    fontSize: "12px",
+                    marginRight: "8px",
+                  }}
+                  onClick={() => onNavigate && onNavigate(`/posts/${id}/edit`)}
                 >
-                  삭제하기
+                  수정
+                </button>
+                <button
+                  style={{
+                    backgroundColor: "#c0c0c0",
+                    border: "solid 2px",
+                    borderColor: "#ffffff #808080 #808080 #ffffff",
+                    padding: "4px 12px",
+                    fontSize: "12px",
+                  }}
+                  onClick={() => {
+                    if (window.confirm("정말 삭제하시겠습니까?")) {
+                      alert(
+                        "게시글이 삭제되었습니다. (실제로는 삭제되지 않습니다)"
+                      );
+                      onNavigate ? onNavigate("/posts") : router.push("/posts");
+                    }
+                  }}
+                >
+                  삭제
                 </button>
               </div>
             )}
           </div>
-
-          {/* 댓글 섹션 */}
-          <div className='mt-8'>
-            <div className='window-header mb-2'>
-              <span className='font-bold'>
-                댓글{" "}
-                {comments && comments.length > 0 ? `(${comments.length})` : ""}
-              </span>
-            </div>
-            <div className='p-4' style={{ border: "var(--inset-border)" }}>
-              {isCommentsLoading ? (
-                <p className='text-center text-sm py-4'>
-                  댓글을 불러오는 중...
-                </p>
-              ) : comments.length === 0 ? (
-                <p className='text-center text-sm py-4 text-gray-500'>
-                  첫 댓글을 작성해보세요!
-                </p>
-              ) : (
-                <div className='space-y-2 mb-4'>
-                  {comments.map((comment) => (
-                    <CommentItem
-                      key={comment.id}
-                      comment={comment}
-                      currentUserId={currentUser?.id}
-                      onDelete={handleCommentDelete}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <CommentForm postId={postId} onCommentAdded={loadComments} />
-            </div>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

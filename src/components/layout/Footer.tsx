@@ -1,184 +1,211 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export function Footer() {
-  const year = new Date().getFullYear();
+interface FooterProps {
+  onNavigate?: (path: string) => void;
+}
 
-  const win98Style = {
-    border: "solid 2px",
-    borderColor: "#ffffff #808080 #808080 #ffffff",
-    backgroundColor: "#c0c0c0",
-    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-  };
+export function Footer({ onNavigate }: FooterProps) {
+  const router = useRouter();
 
-  const windowHeaderStyle = {
-    backgroundColor: "#000080",
-    color: "#ffffff",
-    padding: "2px 4px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-    fontWeight: "bold",
-    fontSize: "12px",
-  };
-
-  const windowControlStyle = {
-    width: "16px",
-    height: "14px",
-    border: "solid 2px",
-    borderColor: "#ffffff #808080 #808080 #ffffff",
-    backgroundColor: "#c0c0c0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
-    margin: "0 2px",
-    outline: "1px solid black",
-    outlineOffset: "-1px",
-  };
-
-  const linkStyle = {
-    color: "#0000ff",
-    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-    fontSize: "12px",
+  // 네비게이션 핸들러
+  const handleNavigation = (path: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      router.push(path);
+    }
   };
 
   return (
-    <div className='footer'>
-      <div className='window' style={win98Style}>
-        <div className='window-header' style={windowHeaderStyle}>
-          <span>정보</span>
-          <div className='window-controls' style={{ display: "flex" }}>
-            <button className='window-control' style={windowControlStyle}>
-              ─
-            </button>
-            <button className='window-control' style={windowControlStyle}>
-              □
-            </button>
-            <button className='window-control' style={windowControlStyle}>
-              ×
-            </button>
+    <div
+      className='site-footer'
+      style={{
+        backgroundColor: "#2C3E50", // 짙은 블루그레이
+        padding: "8px 20px",
+        fontSize: "12px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+        maxWidth: "800px", // 브라우저 창 너비와 맞춤
+        height: "40px",
+        color: "#ECF0F1",
+        boxShadow: "0 -2px 5px rgba(0, 0, 0, 0.1)",
+        marginTop: "20px",
+        borderRadius: "3px",
+      }}
+    >
+      {/* 왼쪽: 로고 */}
+      <div
+        className='footer-left'
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginRight: "12px",
+          }}
+        >
+          <div
+            style={{
+              width: "20px",
+              height: "20px",
+              backgroundColor: "#34495E",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: "8px",
+              fontSize: "10px",
+              borderRadius: "3px",
+              border: "1px solid #3498DB",
+            }}
+          >
+            🔱
           </div>
-        </div>
-        <div className='window-content p-4'>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-            <div>
-              <h3
-                className='text-lg font-bold mb-2'
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "14px",
-                }}
-              >
-                워터베어러
-              </h3>
-              <p
-                className='mb-4'
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "12px",
-                }}
-              >
-                삶의 결정적 순간을 포착하고
-                <br />
-                의미를 더하는 도구
-              </p>
-              <p
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "12px",
-                }}
-              >
-                © {year} 워터베어러. All rights reserved.
-              </p>
-            </div>
-
-            <div>
-              <h3
-                className='text-lg font-bold mb-2'
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "14px",
-                }}
-              >
-                이용안내
-              </h3>
-              <ul className='space-y-2'>
-                {/* <li>
-                  <Link href='/help' className='hover:underline'>
-                    ▶ 도움말
-                  </Link>
-                </li>
-                <li>
-                  <Link href='/faq' className='hover:underline'>
-                    ▶ 자주 묻는 질문
-                  </Link>
-                </li> */}
-                <li>
-                  <Link
-                    href='/contact'
-                    className='hover:underline'
-                    style={linkStyle}
-                  >
-                    ▶ 문의하기
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3
-                className='text-lg font-bold mb-2'
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "14px",
-                }}
-              >
-                법적 고지
-              </h3>
-              <ul className='space-y-2'>
-                {/* <li>
-                  <Link href='/terms' className='hover:underline'>
-                    ▶ 이용약관
-                  </Link>
-                </li>
-                <li>
-                  <Link href='/privacy' className='hover:underline'>
-                    ▶ 개인정보처리방침
-                  </Link>
-                </li>
-                <li>
-                  <Link href='/cookies' className='hover:underline'>
-                    ▶ 쿠키 정책
-                  </Link>
-                </li> */}
-                <li>
-                  <Link
-                    href='/terms'
-                    className='hover:underline'
-                    style={linkStyle}
-                  >
-                    ▶ 이용약관
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <span style={{ fontWeight: "bold", color: "#ECF0F1" }}>
+            워터베어러
+          </span>
         </div>
       </div>
-      <div className='footer-content'>
-        <div className='copyright'>
-          <p>© 2024 워터베어러. All rights reserved.</p>
-          <p className='text-sm text-gray-500'>지속의 지혜, 흐름의 철학</p>
+
+      {/* 중앙: 네비게이션 버튼 */}
+      <div
+        className='footer-nav'
+        style={{ display: "flex", alignItems: "center", gap: "10px" }}
+      >
+        <button
+          onClick={() => router.back()}
+          style={{
+            backgroundColor: "#34495E",
+            border: "1px solid #3498DB",
+            color: "#ECF0F1",
+            padding: "4px 10px",
+            borderRadius: "3px",
+            fontSize: "11px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "10px" }}>◀</span> 뒤로가기
+        </button>
+        <button
+          onClick={(e) => handleNavigation("/", e)}
+          style={{
+            backgroundColor: "#34495E",
+            border: "1px solid #3498DB",
+            color: "#ECF0F1",
+            padding: "4px 10px",
+            borderRadius: "3px",
+            fontSize: "11px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "12px" }}>🏠</span> 홈
+        </button>
+      </div>
+
+      {/* 오른쪽: 링크들 */}
+      <div
+        className='footer-right'
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <div className='footer-links'>
+          <a
+            href='/privacy'
+            onClick={(e) => handleNavigation("/privacy", e)}
+            style={{
+              marginRight: "12px",
+              color: "#ECF0F1",
+              textDecoration: "none",
+              fontSize: "11px",
+            }}
+          >
+            개인정보
+          </a>
+          <a
+            href='/terms'
+            onClick={(e) => handleNavigation("/terms", e)}
+            style={{
+              margin: "0 12px",
+              color: "#ECF0F1",
+              textDecoration: "none",
+              fontSize: "11px",
+            }}
+          >
+            이용약관
+          </a>
+          <a
+            href='/contact'
+            onClick={(e) => handleNavigation("/contact", e)}
+            style={{
+              marginLeft: "12px",
+              color: "#ECF0F1",
+              textDecoration: "none",
+              fontSize: "11px",
+            }}
+          >
+            연락처
+          </a>
         </div>
       </div>
+
+      {/* 모바일 반응형 스타일 */}
+      <style jsx>{`
+        .site-footer {
+          transition: all 0.3s ease;
+        }
+
+        .site-footer:hover {
+          box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:hover {
+          background-color: #2980b9 !important;
+          transition: background-color 0.2s ease;
+        }
+
+        @media (max-width: 640px) {
+          .site-footer {
+            flex-direction: column;
+            height: auto;
+            padding: 10px;
+            gap: 10px;
+          }
+
+          .footer-left,
+          .footer-nav,
+          .footer-right {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .footer-left {
+            margin-bottom: 5px;
+          }
+
+          .footer-nav {
+            order: -1;
+          }
+
+          .footer-links {
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }

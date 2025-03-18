@@ -6,6 +6,20 @@ import Link from "next/link";
 import Clock from "@/components/ui/Clock";
 import { useRouter, usePathname } from "next/navigation";
 import Homepage from "./homepage/page";
+import { Footer } from "@/components/layout/Footer";
+
+// 동적으로 페이지를 불러오기 위해 React.lazy 사용
+import React from "react";
+const AboutPage = React.lazy(() => import("./about/page"));
+const ContactPage = React.lazy(() => import("./contact/page"));
+const FaqPage = React.lazy(() => import("./faq/page"));
+const WorkPage = React.lazy(() => import("./work/page"));
+const PostsPage = React.lazy(() => import("./posts/page"));
+const PrivacyPage = React.lazy(() => import("./privacy/page"));
+const TermsPage = React.lazy(() => import("./terms/page"));
+const MyPage = React.lazy(() => import("./mypage/page"));
+// 게시글 상세 페이지 동적 임포트
+const PostDetail = React.lazy(() => import("./posts/[id]/page"));
 
 type RouteTitle = {
   [key: string]: string;
@@ -17,6 +31,30 @@ export default function Home() {
   const [currentUrl, setCurrentUrl] = useState<string>("/desktop");
   const [pageTitle, setPageTitle] = useState<string>("바탕화면");
   const [startMenuOpen, setStartMenuOpen] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  // 페이지 이동 내역 및 현재 위치 추적을 위한 상태
+  const [history, setHistory] = useState<string[]>(["/desktop"]);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  // 초기 URL 설정
+  useEffect(() => {
+    // 실제 URL이 변경될 때 우리의 내부 URL 상태 업데이트
+    if (pathname === "/") {
+      setCurrentUrl("/desktop");
+    } else {
+      // 실제 pathname을 이용하여 내부 URL 상태 업데이트
+      setCurrentUrl(pathname);
+    }
+  }, [pathname]);
+
+  // 로그인 상태를 localStorage에서 가져오기
+  useEffect(() => {
+    const loggedInState = localStorage.getItem("isLoggedIn");
+    if (loggedInState === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   // 페이지 제목 설정
   useEffect(() => {
@@ -28,14 +66,60 @@ export default function Home() {
       "/faq": "FAQ",
       "/contact": "문의하기",
       "/auth/login": "로그인",
+      "/privacy": "개인정보",
+      "/terms": "이용약관",
+      "/mypage": "마이페이지",
     };
     setPageTitle(titles[currentUrl] || "바탕화면");
   }, [currentUrl]);
 
   // 네비게이션 처리
   const handleNavigation = (path: string) => {
-    setCurrentUrl(path);
+    // 내부 상태만 업데이트하고 URL을 변경하지 않음
+    const normalizedPath = path === "/" ? "/desktop" : path;
+
+    // 현재 위치에서 앞으로 갔던 기록이 있으면 제거
+    if (currentIndex < history.length - 1) {
+      setHistory((prev) => prev.slice(0, currentIndex + 1));
+    }
+
+    // 같은 페이지로 이동하는 경우 히스토리에 추가하지 않음
+    if (normalizedPath !== currentUrl) {
+      // 새 경로를 히스토리에 추가하고 현재 인덱스 업데이트
+      setHistory((prev) => [...prev, normalizedPath]);
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentUrl(normalizedPath);
+    }
+
     setStartMenuOpen(false); // 네비게이션 시 시작 메뉴 닫기
+  };
+
+  // 뒤로가기 처리
+  const handleBack = () => {
+    if (canGoBack()) {
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
+      setCurrentUrl(history[newIndex]);
+    }
+  };
+
+  // 앞으로가기 처리
+  const handleForward = () => {
+    if (canGoForward()) {
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
+      setCurrentUrl(history[newIndex]);
+    }
+  };
+
+  // 뒤로가기 가능 여부 확인
+  const canGoBack = () => {
+    return currentIndex > 0;
+  };
+
+  // 앞으로가기 가능 여부 확인
+  const canGoForward = () => {
+    return currentIndex < history.length - 1;
   };
 
   // 시작 메뉴 토글
@@ -43,8 +127,194 @@ export default function Home() {
     setStartMenuOpen(!startMenuOpen);
   };
 
+  // 로그인 처리
+  const handleLogin = () => {
+    // 실제 로그인 로직은 추후 구현할 수 있음
+    setIsLoggedIn(true);
+    localStorage.setItem("isLoggedIn", "true");
+    handleNavigation("/desktop");
+  };
+
+  // 로그아웃 처리
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
+    handleNavigation("/desktop");
+  };
+
+  // 페이지 컴포넌트 맵핑
+  const getPageComponent = () => {
+    // 게시글 상세 페이지 경로 패턴 확인
+    // 숫자뿐 아니라 모든 문자를 포함하는 ID 패턴으로 수정
+    const postDetailRegex = /^\/posts\/([^\/]+)$/;
+    const match = currentUrl.match(postDetailRegex);
+
+    if (match) {
+      // 게시글 ID 추출
+      const postId = match[1];
+      return (
+        <React.Suspense fallback={<div>로딩 중...</div>}>
+          <PostDetail id={postId} onNavigate={handleNavigation} />
+        </React.Suspense>
+      );
+    }
+
+    switch (currentUrl) {
+      case "/desktop":
+        return (
+          <Homepage isLoggedIn={isLoggedIn} onNavigate={handleNavigation} />
+        );
+      case "/about":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <AboutPage />
+          </React.Suspense>
+        );
+      case "/contact":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <ContactPage />
+          </React.Suspense>
+        );
+      case "/faq":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <FaqPage />
+          </React.Suspense>
+        );
+      case "/work":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <WorkPage />
+          </React.Suspense>
+        );
+      case "/posts":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <PostsPage onNavigate={handleNavigation} />
+          </React.Suspense>
+        );
+      case "/privacy":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <PrivacyPage />
+          </React.Suspense>
+        );
+      case "/terms":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <TermsPage />
+          </React.Suspense>
+        );
+      case "/mypage":
+        return (
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <MyPage />
+          </React.Suspense>
+        );
+      case "/auth/login":
+        return (
+          <div className='p-4'>
+            <div className='window mb-4 w-full' style={{ height: "auto" }}>
+              <div className='window-header'>
+                <span>로그인</span>
+                <div className='window-controls'>
+                  <button className='window-control'>─</button>
+                  <button className='window-control'>□</button>
+                  <button className='window-control'>×</button>
+                </div>
+              </div>
+              <div className='window-content p-4'>
+                <div style={{ padding: "16px" }}>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "4px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      이메일:
+                    </label>
+                    <input
+                      type='email'
+                      style={{
+                        width: "100%",
+                        padding: "4px 8px",
+                        border: "solid 2px",
+                        borderColor: "#808080 #ffffff #ffffff #808080",
+                      }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "4px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      비밀번호:
+                    </label>
+                    <input
+                      type='password'
+                      style={{
+                        width: "100%",
+                        padding: "4px 8px",
+                        border: "solid 2px",
+                        borderColor: "#808080 #ffffff #ffffff #808080",
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: "16px",
+                    }}
+                  >
+                    <button
+                      style={{
+                        border: "solid 2px",
+                        borderColor: "#ffffff #808080 #808080 #ffffff",
+                        backgroundColor: "#c0c0c0",
+                        padding: "4px 12px",
+                      }}
+                      onClick={handleLogin}
+                    >
+                      로그인
+                    </button>
+                    <button
+                      style={{
+                        border: "solid 2px",
+                        borderColor: "#ffffff #808080 #808080 #ffffff",
+                        backgroundColor: "#c0c0c0",
+                        padding: "4px 12px",
+                      }}
+                      onClick={() => handleNavigation("/desktop")}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return <div>페이지를 찾을 수 없습니다.</div>;
+    }
+  };
+
+  // URL 표시
+  const getCurrentDisplayUrl = () => {
+    return currentUrl === "/desktop"
+      ? "https://www.waterbearer.io/"
+      : `https://www.waterbearer.io${currentUrl}`;
+  };
+
   return (
-    <div className='min-h-screen bg-teal-600 flex flex-col items-center justify-center p-2 sm:p-4'>
+    <div className='min-h-screen bg-teal-600 flex flex-col items-center justify-between p-2 sm:p-4'>
       {/* 전체 페이지에 적용될 전역 스타일 */}
       <style jsx global>{`
         body {
@@ -292,297 +562,233 @@ export default function Home() {
           font-size: 12px;
           cursor: pointer;
         }
+        .nav-button:disabled {
+          color: #808080;
+          cursor: default;
+          opacity: 0.6;
+        }
+        .main-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          width: 100%;
+        }
       `}</style>
 
-      {/* Windows 98 스타일 브라우저 창 */}
-      <div className='browser-window'>
-        {/* 메뉴 바 */}
-        <div
-          style={{
-            backgroundColor: "#c0c0c0",
-            borderBottom: "solid 1px #808080",
-            padding: "2px 4px",
-            display: "flex",
-            fontSize: "12px",
-          }}
-        >
+      <div className='main-container'>
+        {/* Windows 98 스타일 브라우저 창 */}
+        <div className='browser-window'>
+          {/* 메뉴 바 */}
           <div
             style={{
-              padding: "2px 8px",
               backgroundColor: "#c0c0c0",
-              marginRight: "4px",
-              borderTop: "solid 1px #ffffff",
-              borderLeft: "solid 1px #ffffff",
-              borderRight: "solid 1px #808080",
               borderBottom: "solid 1px #808080",
+              padding: "2px 4px",
+              display: "flex",
+              fontSize: "12px",
             }}
           >
-            파일
-          </div>
-          <div
-            style={{
-              padding: "2px 8px",
-              backgroundColor: "#c0c0c0",
-              marginRight: "4px",
-              borderTop: "solid 1px #ffffff",
-              borderLeft: "solid 1px #ffffff",
-              borderRight: "solid 1px #808080",
-              borderBottom: "solid 1px #808080",
-            }}
-          >
-            편집
-          </div>
-          <div
-            style={{
-              padding: "2px 8px",
-              backgroundColor: "#c0c0c0",
-              marginRight: "4px",
-              borderTop: "solid 1px #ffffff",
-              borderLeft: "solid 1px #ffffff",
-              borderRight: "solid 1px #808080",
-              borderBottom: "solid 1px #808080",
-            }}
-          >
-            보기
-          </div>
-          <div
-            style={{
-              padding: "2px 8px",
-              backgroundColor: "#c0c0c0",
-              marginRight: "4px",
-              borderTop: "solid 1px #ffffff",
-              borderLeft: "solid 1px #ffffff",
-              borderRight: "solid 1px #808080",
-              borderBottom: "solid 1px #808080",
-            }}
-          >
-            북마크
-          </div>
-          <div
-            style={{
-              padding: "2px 8px",
-              backgroundColor: "#c0c0c0",
-              marginRight: "4px",
-              borderTop: "solid 1px #ffffff",
-              borderLeft: "solid 1px #ffffff",
-              borderRight: "solid 1px #808080",
-              borderBottom: "solid 1px #808080",
-            }}
-          >
-            도움말
-          </div>
-        </div>
-
-        {/* 네비게이션 툴바 */}
-        <div
-          style={{
-            backgroundColor: "#c0c0c0",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            borderBottom: "solid 1px #808080",
-          }}
-        >
-          <button
-            className='nav-button'
-            onClick={() => {
-              if (currentUrl !== "/desktop") {
-                handleNavigation("/desktop");
-              }
-            }}
-          >
-            ◀
-          </button>
-          <button
-            className='nav-button'
-            onClick={() => {
-              // 앞으로 가기 기능 (필요시 구현)
-            }}
-          >
-            ▶
-          </button>
-          <button
-            className='nav-button'
-            onClick={() => {
-              handleNavigation(currentUrl);
-            }}
-          >
-            ↻
-          </button>
-          <div
-            style={{
-              height: "24px",
-              width: "1px",
-              backgroundColor: "#808080",
-              margin: "0 4px",
-            }}
-          ></div>
-          <div className='url-input'>
-            {currentUrl === "/desktop"
-              ? "https://www.waterbearer.io/"
-              : `https://www.waterbearer.io${currentUrl}`}
-          </div>
-          <button className='nav-button'>🔍</button>
-        </div>
-
-        {/* 브라우저 콘텐츠 영역 */}
-        <div className='browser-content'>
-          {/* 현재 URL에 따라 페이지 컨텐츠 렌더링 */}
-          {currentUrl === "/desktop" ? (
-            <Homepage />
-          ) : currentUrl === "/auth/login" ? (
-            <div className='p-4'>
-              <div className='window mb-4 w-full' style={{ height: "auto" }}>
-                <div className='window-header'>
-                  <span>로그인</span>
-                  <div className='window-controls'>
-                    <button className='window-control'>─</button>
-                    <button className='window-control'>□</button>
-                    <button className='window-control'>×</button>
-                  </div>
-                </div>
-                <div className='window-content p-4'>
-                  <div style={{ padding: "16px" }}>
-                    <div style={{ marginBottom: "12px" }}>
-                      <label
-                        style={{
-                          display: "block",
-                          marginBottom: "4px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        이메일:
-                      </label>
-                      <input
-                        type='email'
-                        style={{
-                          width: "100%",
-                          padding: "4px 8px",
-                          border: "solid 2px",
-                          borderColor: "#808080 #ffffff #ffffff #808080",
-                        }}
-                      />
-                    </div>
-                    <div style={{ marginBottom: "16px" }}>
-                      <label
-                        style={{
-                          display: "block",
-                          marginBottom: "4px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        비밀번호:
-                      </label>
-                      <input
-                        type='password'
-                        style={{
-                          width: "100%",
-                          padding: "4px 8px",
-                          border: "solid 2px",
-                          borderColor: "#808080 #ffffff #ffffff #808080",
-                        }}
-                      />
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: "16px",
-                      }}
-                    >
-                      <button
-                        style={{
-                          border: "solid 2px",
-                          borderColor: "#ffffff #808080 #808080 #ffffff",
-                          backgroundColor: "#c0c0c0",
-                          padding: "4px 12px",
-                        }}
-                        onClick={() => handleNavigation("/desktop")}
-                      >
-                        로그인
-                      </button>
-                      <button
-                        style={{
-                          border: "solid 2px",
-                          borderColor: "#ffffff #808080 #808080 #ffffff",
-                          backgroundColor: "#c0c0c0",
-                          padding: "4px 12px",
-                        }}
-                        onClick={() => handleNavigation("/desktop")}
-                      >
-                        취소
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div
+              style={{
+                padding: "2px 8px",
+                backgroundColor: "#c0c0c0",
+                marginRight: "4px",
+                borderTop: "solid 1px #ffffff",
+                borderLeft: "solid 1px #ffffff",
+                borderRight: "solid 1px #808080",
+                borderBottom: "solid 1px #808080",
+              }}
+            >
+              파일
             </div>
-          ) : (
-            <div className='iframe-container'>
-              <iframe
-                src={currentUrl}
-                title={pageTitle}
-                onLoad={(e) => {
-                  // 필요시 iframe 로드 완료 후 추가 처리
-                }}
-              />
+            <div
+              style={{
+                padding: "2px 8px",
+                backgroundColor: "#c0c0c0",
+                marginRight: "4px",
+                borderTop: "solid 1px #ffffff",
+                borderLeft: "solid 1px #ffffff",
+                borderRight: "solid 1px #808080",
+                borderBottom: "solid 1px #808080",
+              }}
+            >
+              편집
             </div>
-          )}
-        </div>
+            <div
+              style={{
+                padding: "2px 8px",
+                backgroundColor: "#c0c0c0",
+                marginRight: "4px",
+                borderTop: "solid 1px #ffffff",
+                borderLeft: "solid 1px #ffffff",
+                borderRight: "solid 1px #808080",
+                borderBottom: "solid 1px #808080",
+              }}
+            >
+              보기
+            </div>
+            <div
+              style={{
+                padding: "2px 8px",
+                backgroundColor: "#c0c0c0",
+                marginRight: "4px",
+                borderTop: "solid 1px #ffffff",
+                borderLeft: "solid 1px #ffffff",
+                borderRight: "solid 1px #808080",
+                borderBottom: "solid 1px #808080",
+              }}
+            >
+              북마크
+            </div>
+            <div
+              style={{
+                padding: "2px 8px",
+                backgroundColor: "#c0c0c0",
+                marginRight: "4px",
+                borderTop: "solid 1px #ffffff",
+                borderLeft: "solid 1px #ffffff",
+                borderRight: "solid 1px #808080",
+                borderBottom: "solid 1px #808080",
+              }}
+            >
+              도움말
+            </div>
+          </div>
 
-        {/* Windows 98 스타일 작업 표시줄 (창 내부에 위치) */}
-        <div className='taskbar'>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <button className='start-button' onClick={toggleStartMenu}>
-              <span style={{ marginRight: "4px" }}>🪟</span> 시작
+          {/* 네비게이션 툴바 */}
+          <div
+            style={{
+              backgroundColor: "#c0c0c0",
+              padding: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              borderBottom: "solid 1px #808080",
+            }}
+          >
+            <button
+              className='nav-button'
+              onClick={handleBack}
+              disabled={!canGoBack()}
+              title='뒤로가기'
+            >
+              ◀
             </button>
-
-            {/* 시작 메뉴 */}
-            {startMenuOpen && (
-              <div className='start-menu'>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/work")}
-                >
-                  📁 내 작업
-                </div>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/posts")}
-                >
-                  💬 커뮤니티
-                </div>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/about")}
-                >
-                  ℹ️ 정보
-                </div>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/faq")}
-                >
-                  ❓ FAQ
-                </div>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/contact")}
-                >
-                  ✉️ 문의하기
-                </div>
-                <div
-                  className='start-menu-item'
-                  onClick={() => handleNavigation("/auth/login")}
-                >
-                  🔑 로그인
-                </div>
-              </div>
-            )}
+            <button
+              className='nav-button'
+              onClick={handleForward}
+              disabled={!canGoForward()}
+              title='앞으로가기'
+            >
+              ▶
+            </button>
+            <button
+              className='nav-button'
+              onClick={() => {
+                handleNavigation(currentUrl);
+              }}
+              title='새로고침'
+            >
+              ↻
+            </button>
+            <div
+              style={{
+                height: "24px",
+                width: "1px",
+                backgroundColor: "#808080",
+                margin: "0 4px",
+              }}
+            ></div>
+            <div className='url-input'>{getCurrentDisplayUrl()}</div>
+            <button className='nav-button'>🔍</button>
           </div>
-          <Clock />
+
+          {/* 브라우저 콘텐츠 영역 */}
+          <div className='browser-content'>
+            {/* 현재 URL에 따라 페이지 컨텐츠 렌더링 */}
+            {getPageComponent()}
+          </div>
+
+          {/* Windows 98 스타일 작업 표시줄 (창 내부에 위치) */}
+          <div className='taskbar'>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <button className='start-button' onClick={toggleStartMenu}>
+                <span style={{ marginRight: "4px" }}>🪟</span> 시작
+              </button>
+
+              {/* 시작 메뉴 */}
+              {startMenuOpen && (
+                <div className='start-menu'>
+                  <div
+                    className='start-menu-item'
+                    onClick={() => handleNavigation("/work")}
+                  >
+                    📁 내 작업
+                  </div>
+                  <div
+                    className='start-menu-item'
+                    onClick={() => handleNavigation("/posts")}
+                  >
+                    💬 커뮤니티
+                  </div>
+                  <div
+                    className='start-menu-item'
+                    onClick={() => handleNavigation("/about")}
+                  >
+                    ℹ️ 정보
+                  </div>
+                  <div
+                    className='start-menu-item'
+                    onClick={() => handleNavigation("/faq")}
+                  >
+                    ❓ FAQ
+                  </div>
+                  <div
+                    className='start-menu-item'
+                    onClick={() => handleNavigation("/contact")}
+                  >
+                    ✉️ 문의하기
+                  </div>
+                  {isLoggedIn ? (
+                    <>
+                      <div
+                        className='start-menu-item'
+                        onClick={() => handleNavigation("/mypage")}
+                      >
+                        👤 마이페이지
+                      </div>
+                      <div className='start-menu-item' onClick={handleLogout}>
+                        🚪 로그아웃
+                      </div>
+                    </>
+                  ) : (
+                    <div
+                      className='start-menu-item'
+                      onClick={() => handleNavigation("/auth/login")}
+                    >
+                      🔑 로그인
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {isLoggedIn && (
+                <div style={{ marginRight: "10px", fontSize: "11px" }}>
+                  <span style={{ color: "#000080", fontWeight: "bold" }}>
+                    👤 로그인됨
+                  </span>
+                </div>
+              )}
+              <Clock />
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* 푸터 - 모니터 외부로 이동 */}
+      <Footer onNavigate={handleNavigation} />
     </div>
   );
 }

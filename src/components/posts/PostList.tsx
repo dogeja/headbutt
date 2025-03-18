@@ -10,6 +10,7 @@ type Post = {
   author_name: string; // DB와 일치하도록 변경
   created_at: Date | string; // 문자열 타입도 허용
   view_count: number; // DB와 일치하도록 변경
+  comment_count?: number; // 댓글 수 추가
   content?: string;
 };
 
@@ -17,12 +18,14 @@ type PostListProps = {
   posts: Post[];
   isLoading?: boolean;
   isAuthenticated?: boolean;
+  onNavigate?: (path: string) => void;
 };
 
 export function PostList({
   posts,
   isLoading = false,
   isAuthenticated = false,
+  onNavigate,
 }: PostListProps) {
   // 로딩 상태 표시
   if (isLoading) {
@@ -58,23 +61,21 @@ export function PostList({
           </p>
           <div className='flex justify-center'>
             {isAuthenticated ? (
-              <Link href='/posts/write'>
-                <button
-                  className='px-4 py-2 button'
-                  style={{ border: "var(--outset-border)" }}
-                >
-                  첫 게시글 작성하기
-                </button>
-              </Link>
+              <button
+                className='px-4 py-2 button'
+                style={{ border: "var(--outset-border)" }}
+                onClick={() => (onNavigate ? onNavigate("/posts/write") : null)}
+              >
+                첫 게시글 작성하기
+              </button>
             ) : (
-              <Link href='/auth/login'>
-                <button
-                  className='px-4 py-2 button'
-                  style={{ border: "var(--outset-border)" }}
-                >
-                  로그인
-                </button>
-              </Link>
+              <button
+                className='px-4 py-2 button'
+                style={{ border: "var(--outset-border)" }}
+                onClick={() => (onNavigate ? onNavigate("/auth/login") : null)}
+              >
+                로그인
+              </button>
             )}
           </div>
         </div>
@@ -109,9 +110,10 @@ export function PostList({
         <div className='flex justify-between items-center'>
           <div className='flex-1 font-bold pl-2'>제목</div>
           <div className='flex space-x-6 shrink-0'>
-            <div className='w-24 text-right font-bold'>작성자</div>
+            <div className='w-36 text-right font-bold'>작성자</div>
             <div className='w-28 text-right font-bold'>작성일</div>
             <div className='w-16 text-right font-bold'>조회수</div>
+            <div className='w-16 text-right font-bold'>댓글</div>
           </div>
         </div>
       </div>
@@ -126,7 +128,9 @@ export function PostList({
             author={post.author_name}
             createdAt={new Date(post.created_at)}
             viewCount={post.view_count}
+            commentCount={post.comment_count || 0}
             content={post.content}
+            onNavigate={onNavigate}
           />
         ))}
       </div>
