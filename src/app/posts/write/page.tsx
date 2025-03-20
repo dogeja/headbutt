@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/posts/PostForm";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { createPost } from "@/services/posts";
 
-export default function WritePostPage() {
+interface WritePostPageProps {
+  onNavigate?: (path: string) => void;
+}
+
+export default function WritePostPage({ onNavigate }: WritePostPageProps) {
   const router = useRouter();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,19 +19,28 @@ export default function WritePostPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // 인증 상태 확인 (Supabase Auth 사용)
+  // 인증 상태 확인 (localStorage 사용)
   useEffect(() => {
     async function checkAuth() {
       try {
+        // 기존 Supabase 인증 로직은 유지하되, localStorage도 확인
+        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
         // Supabase에서 현재 로그인된 사용자 확인
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        setIsAuthenticated(!!user);
-        setUser(user);
+
+        setIsAuthenticated(!!user || isLoggedIn);
+        setUser(user || { id: "local-user" });
       } catch (err) {
         console.error("인증 확인 오류:", err);
-        setIsAuthenticated(false);
+        // localStorage에서 로그인 상태 확인 (폴백)
+        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+        setIsAuthenticated(isLoggedIn);
+        if (isLoggedIn) {
+          setUser({ id: "local-user" });
+        }
       } finally {
         setIsCheckingAuth(false);
       }
@@ -44,6 +56,19 @@ export default function WritePostPage() {
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
+  };
+
+  // 내부 네비게이션 처리 함수
+  const navigate = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      // 폴백으로만 사용, 기본적으로는 항상 onNavigate 사용
+      console.warn(
+        "onNavigate prop이 없습니다. 내부 라우팅이 동작하지 않을 수 있습니다."
+      );
+      router.push(path);
+    }
   };
 
   // 폼 제출 핸들러
@@ -63,22 +88,24 @@ export default function WritePostPage() {
 
     setIsSubmitting(true);
     try {
-      // 현재 사용자 프로필 정보 가져오기
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("username, full_name")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // 작성자 이름 설정 (full_name이 있으면 full_name, 없으면 username 사용)
-      const authorName = profileData.full_name || profileData.username;
-
       // 게시글 생성
       const newPost = await createPost(title, content);
+      console.log("게시글이 성공적으로 생성되었습니다:", newPost);
 
-      router.push(`/posts/${newPost.id}`);
+      // 내부 네비게이션 사용
+      if (onNavigate) {
+        // onNavigate가 있을 경우 내부 라우팅 사용
+        console.log(
+          `내부 라우팅을 사용하여 게시글 보기로 이동합니다: /posts/${newPost.id}`
+        );
+        onNavigate(`/posts/${newPost.id}`);
+      } else {
+        // onNavigate가 없을 경우 폴백으로 router.push 사용
+        console.warn(
+          "내부 라우팅이 제공되지 않아 Next.js 라우터를 사용합니다."
+        );
+        router.push(`/posts/${newPost.id}`);
+      }
     } catch (err: any) {
       console.error("게시글 작성 중 오류:", err);
       alert(
@@ -132,14 +159,13 @@ export default function WritePostPage() {
               게시글을 작성하려면 로그인이 필요합니다.
             </p>
             <div className='flex justify-center'>
-              <Link href='/auth/login'>
-                <button
-                  className='button'
-                  style={{ border: "var(--outset-border)" }}
-                >
-                  로그인 페이지로 이동
-                </button>
-              </Link>
+              <button
+                className='button'
+                style={{ border: "var(--outset-border)" }}
+                onClick={() => navigate("/auth/login")}
+              >
+                로그인 페이지로 이동
+              </button>
             </div>
           </div>
         </div>
@@ -178,6 +204,7 @@ export default function WritePostPage() {
               title={title}
               content={content}
               isSubmitting={isSubmitting}
+              onNavigate={navigate}
             />
           </div>
         </div>

@@ -20,6 +20,8 @@ const TermsPage = React.lazy(() => import("./terms/page"));
 const MyPage = React.lazy(() => import("./mypage/page"));
 // 게시글 상세 페이지 동적 임포트
 const PostDetail = React.lazy(() => import("./posts/[id]/page"));
+// 게시글 작성 페이지 동적 임포트
+const WritePostPage = React.lazy(() => import("./posts/write/page"));
 
 type RouteTitle = {
   [key: string]: string;
@@ -144,6 +146,15 @@ export default function Home() {
 
   // 페이지 컴포넌트 맵핑
   const getPageComponent = () => {
+    // 게시글 작성 페이지 경로를 먼저 확인
+    if (currentUrl === "/posts/write") {
+      return (
+        <React.Suspense fallback={<div>로딩 중...</div>}>
+          <WritePostPage onNavigate={handleNavigation} />
+        </React.Suspense>
+      );
+    }
+
     // 게시글 상세 페이지 경로 패턴 확인
     // 숫자뿐 아니라 모든 문자를 포함하는 ID 패턴으로 수정
     const postDetailRegex = /^\/posts\/([^\/]+)$/;
@@ -152,6 +163,7 @@ export default function Home() {
     if (match) {
       // 게시글 ID 추출
       const postId = match[1];
+
       return (
         <React.Suspense fallback={<div>로딩 중...</div>}>
           <PostDetail id={postId} onNavigate={handleNavigation} />

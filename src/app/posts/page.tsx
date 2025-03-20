@@ -170,18 +170,21 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
         <div className='window-header mb-4 flex justify-between items-center'>
           <span className='font-bold text-lg'>커뮤니티 게시판</span>
           {isAuthenticated && (
-            <Link href='/posts/write'>
-              <button
-                className='button-3d px-4 py-1 text-sm'
-                style={{
-                  border: "var(--outset-border)",
-                  background: "var(--button-face)",
-                  boxShadow: "2px 2px 0 var(--button-shadow)",
-                }}
-              >
-                글쓰기
-              </button>
-            </Link>
+            <button
+              className='button-3d px-4 py-1 text-sm'
+              style={{
+                border: "var(--outset-border)",
+                background: "var(--button-face)",
+                boxShadow: "2px 2px 0 var(--button-shadow)",
+              }}
+              onClick={() =>
+                onNavigate
+                  ? onNavigate("/posts/write")
+                  : router.push("/posts/write")
+              }
+            >
+              글쓰기
+            </button>
           )}
         </div>
 

@@ -22,6 +22,9 @@ interface PostFormProps {
   initialTitle?: string;
   initialContent?: string;
   onComplete?: () => Promise<void>;
+
+  // 내부 라우팅용 함수
+  onNavigate?: (path: string) => void;
 }
 
 export function PostForm({
@@ -40,6 +43,9 @@ export function PostForm({
   initialTitle = "",
   initialContent = "",
   onComplete,
+
+  // 내부 라우팅용 함수
+  onNavigate,
 }: PostFormProps) {
   const router = useRouter();
   const [internalTitle, setInternalTitle] = useState(initialTitle);
@@ -191,16 +197,28 @@ export function PostForm({
 
       {/* 버튼 영역 */}
       <div className='flex justify-between mt-6'>
-        <Link href={isEdit ? `/posts/${postId}` : "/posts"}>
-          <button
-            type='button'
-            className='button'
-            style={{ border: "var(--outset-border)" }}
-            disabled={isProcessing}
-          >
-            취소
-          </button>
-        </Link>
+        <button
+          type='button'
+          className='button'
+          style={{ border: "var(--outset-border)" }}
+          disabled={isProcessing}
+          onClick={() => {
+            const path = isEdit ? `/posts/${postId}` : "/posts";
+            if (onNavigate) {
+              // 내부 라우팅이 있는 경우 우선 사용
+              console.log(`내부 라우팅을 사용하여 ${path}로 이동합니다.`);
+              onNavigate(path);
+            } else {
+              // 내부 라우팅이 없는 경우 Next.js 라우터 사용
+              console.warn(
+                "내부 라우팅이 제공되지 않아 Next.js 라우터를 사용합니다."
+              );
+              router.push(path);
+            }
+          }}
+        >
+          취소
+        </button>
 
         <button
           type='submit'

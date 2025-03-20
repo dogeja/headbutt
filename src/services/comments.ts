@@ -37,12 +37,31 @@ export const createComment = async (
   } = await supabase.auth.getUser();
   if (!user) throw new Error("로그인이 필요합니다");
 
+  // 사용자 프로필에서 이름 정보 가져오기 시도
+  let userName = authorName; // 기본값으로 전달받은 이름 사용
+
+  try {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("username, full_name")
+      .eq("id", user.id)
+      .single();
+
+    // 프로필 정보가 있으면 실제 이름으로 업데이트
+    if (profileData) {
+      userName = profileData.full_name || profileData.username || userName;
+    }
+  } catch (profileErr) {
+    console.log("프로필 정보 로드 중 오류:", profileErr);
+    // 오류 발생 시 전달받은 authorName 사용
+  }
+
   const { data, error } = await supabase
     .from("comments")
     .insert({
       post_id: postId,
       author_id: user.id,
-      author_name: authorName,
+      author_name: userName,
       content,
     })
     .select("*")

@@ -1,0 +1,94 @@
+/* 기본 컨테이너 스타일 */
+.container {
+  padding: 8px;
+}
+
+/* 윈도우 관련 스타일 */
+.window {
+  height: auto;
+  overflow: visible;
+  margin-bottom: 8px;
+  border: 2px solid #aeaeae;
+  background-color: #d4d0c8;
+  border-radius: 0;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.windowHeader {
+  background-color: #0a246a;
+  color: white;
+  padding: 2px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+}
+
+.windowControls {
+  display: flex;
+}
+
+.windowControl {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  background-color: #d4d0c8;
+  border: 1px solid #808080;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* 윈도우 컨텐츠 영역 */
+.windowContent {
+  height: auto;
+  min-height: 0;
+  padding: 10px 10px 0;
+  box-sizing: border-box;
+  overflow: visible;
+  background-color: #d4d0c8;
+}
+
+/* 작은 마진 */
+.mb1 {
+  margin-bottom: 8px;
+}
+
+/* 버튼 스타일 */
+.winButton {
+  border: solid 2px;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  background-color: #c0c0c0;
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+  outline: 1px solid black;
+  outline-offset: -1px;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+/* 아이콘 스타일 */
+.desktopIcon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border: solid 1px #808080;
+  background-color: #ececec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.iconLabel {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #000000;
+  text-align: center;
+}
