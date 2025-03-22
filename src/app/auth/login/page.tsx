@@ -1,12 +1,16 @@
 "use client";
 
-import { WindowContainer } from "@/components/ui/WindowContainer";
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export default function LoginPage() {
+interface LoginPageProps {
+  onNavigate?: (path: string) => void;
+}
+
+export default function LoginPage({ onNavigate }: LoginPageProps) {
   return (
-    <WindowContainer title='로그인'>
-      <LoginForm />
-    </WindowContainer>
+    <div className='py-4'>
+      <h1 className='text-xl font-bold mb-6'>로그인</h1>
+      <LoginForm onNavigate={onNavigate} />
+    </div>
   );
 }

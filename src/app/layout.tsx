@@ -3,6 +3,7 @@ import "@/styles/index.css";
 import type { Metadata } from "next";
 import { Inter, VT323 } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { WindowLayout } from "@/components/layouts/WindowLayout";
 
 // 기본 글꼴 및 복고풍 글꼴 불러오기
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

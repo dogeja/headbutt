@@ -32,11 +32,35 @@ export function useAuth() {
         throw error;
       }
 
-      router.push("/");
+      // 로그인 성공 - 리디렉션은 컴포넌트 레벨에서 처리
+      // 이제 여기서 router.push를 호출하지 않음
+      return true;
     } catch (error: any) {
       setAuthError("로그인 정보가 올바르지 않습니다.");
       console.error(error);
+      throw error;
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setAuthError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      // 리디렉션이 발생하므로 여기서 추가 코드는 실행되지 않음
+    } catch (error: any) {
+      setAuthError("구글 로그인 중 오류가 발생했습니다.");
+      console.error(error);
       setIsLoading(false);
     }
   };
@@ -81,6 +105,7 @@ export function useAuth() {
     showEmailConfirmModal,
     setShowEmailConfirmModal,
     handleLogin,
+    handleGoogleLogin,
     handleResendEmail,
     handleLogout,
   };

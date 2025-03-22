@@ -1,45 +1,27 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { WindowLayout } from "@/components/layouts/WindowLayout";
 
-interface WindowContainerProps {
-  title: string;
-  children: React.ReactNode;
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
-}
-
-const maxWidthMap = {
-  xs: "max-w-xs",
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-};
-
+/**
+ * @deprecated WindowLayout을 대신 사용하세요. 이 컴포넌트는 호환성을 위해 유지됩니다.
+ */
 export function WindowContainer({
   title,
   children,
   maxWidth = "md",
-}: WindowContainerProps) {
-  const pathname = usePathname();
-
-  // /auth/login 페이지에서 WindowContainer 자체를 렌더링하지 않음
-  if (pathname === "/auth/login") {
-    return <>{children}</>;
-  }
+}: {
+  title: string;
+  children: React.ReactNode;
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
+}) {
+  console.warn(
+    "WindowContainer는 곧 지원 중단됩니다. WindowLayout을 대신 사용하세요."
+  );
 
   return (
-    <div className={`window mx-auto mt-10 ${maxWidthMap[maxWidth]}`}>
-      <div className='window-header'>
-        <div className='window-title'>{title || "워터베어러"}</div>
-        <div className='window-controls'>
-          <button className='window-control'>─</button>
-          <button className='window-control'>□</button>
-          <button className='window-control'>×</button>
-        </div>
-      </div>
-      <div className='window-content p-6'>{children}</div>
-    </div>
+    <WindowLayout title={title} maxWidth={maxWidth}>
+      {children}
+    </WindowLayout>
   );
 }

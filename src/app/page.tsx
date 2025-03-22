@@ -7,6 +7,7 @@ import Clock from "@/components/ui/Clock";
 import { useRouter, usePathname } from "next/navigation";
 import Homepage from "./homepage/page";
 import { Footer } from "@/components/layout/Footer";
+import { WindowLayout } from "@/components/layouts/WindowLayout";
 
 // 동적으로 페이지를 불러오기 위해 React.lazy 사용
 import React from "react";
@@ -22,6 +23,8 @@ const MyPage = React.lazy(() => import("./mypage/page"));
 const PostDetail = React.lazy(() => import("./posts/[id]/page"));
 // 게시글 작성 페이지 동적 임포트
 const WritePostPage = React.lazy(() => import("./posts/write/page"));
+// 로그인 페이지 동적 임포트
+const LoginPage = React.lazy(() => import("./auth/login/page"));
 
 type RouteTitle = {
   [key: string]: string;
@@ -131,7 +134,7 @@ export default function Home() {
 
   // 로그인 처리
   const handleLogin = () => {
-    // 실제 로그인 로직은 추후 구현할 수 있음
+    // 로그인 상태 관리
     setIsLoggedIn(true);
     localStorage.setItem("isLoggedIn", "true");
     handleNavigation("/desktop");
@@ -226,92 +229,11 @@ export default function Home() {
         );
       case "/auth/login":
         return (
-          <div className='p-4'>
-            <div className='window mb-4 w-full' style={{ height: "auto" }}>
-              <div className='window-header'>
-                <span>로그인</span>
-                <div className='window-controls'>
-                  <button className='window-control'>─</button>
-                  <button className='window-control'>□</button>
-                  <button className='window-control'>×</button>
-                </div>
-              </div>
-              <div className='window-content p-4'>
-                <div style={{ padding: "16px" }}>
-                  <div style={{ marginBottom: "12px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "4px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      이메일:
-                    </label>
-                    <input
-                      type='email'
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        border: "solid 2px",
-                        borderColor: "#808080 #ffffff #ffffff #808080",
-                      }}
-                    />
-                  </div>
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "4px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      비밀번호:
-                    </label>
-                    <input
-                      type='password'
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        border: "solid 2px",
-                        borderColor: "#808080 #ffffff #ffffff #808080",
-                      }}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginTop: "16px",
-                    }}
-                  >
-                    <button
-                      style={{
-                        border: "solid 2px",
-                        borderColor: "#ffffff #808080 #808080 #ffffff",
-                        backgroundColor: "#c0c0c0",
-                        padding: "4px 12px",
-                      }}
-                      onClick={handleLogin}
-                    >
-                      로그인
-                    </button>
-                    <button
-                      style={{
-                        border: "solid 2px",
-                        borderColor: "#ffffff #808080 #808080 #ffffff",
-                        backgroundColor: "#c0c0c0",
-                        padding: "4px 12px",
-                      }}
-                      onClick={() => handleNavigation("/desktop")}
-                    >
-                      취소
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <React.Suspense fallback={<div>로딩 중...</div>}>
+            <WindowLayout title='로그인'>
+              <LoginPage onNavigate={handleNavigation} />
+            </WindowLayout>
+          </React.Suspense>
         );
       default:
         return <div>페이지를 찾을 수 없습니다.</div>;

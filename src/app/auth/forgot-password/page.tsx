@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { WindowContainer } from "@/components/ui/WindowContainer";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -40,7 +39,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <WindowContainer title='비밀번호 찾기'>
+    <div className='py-4'>
+      <h1 className='text-xl font-bold mb-6'>비밀번호 찾기</h1>
+
       {isSuccess ? (
         <div className='text-center'>
           <h2 className='text-xl font-bold mb-4'>이메일이 발송되었습니다</h2>
@@ -105,6 +106,6 @@ export default function ForgotPasswordPage() {
           </div>
         </form>
       )}
-    </WindowContainer>
+    </div>
   );
 }

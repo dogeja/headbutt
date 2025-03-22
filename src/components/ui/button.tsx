@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "danger" | "outline";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
   isLoading?: boolean;
@@ -36,14 +36,23 @@ export function Button({
     primary: "bg-[var(--button-face)]",
     secondary: "bg-[#e0e0e0]",
     danger: "bg-[#ff9999]",
+    outline: "bg-white border-[1px] border-gray-300",
   };
 
   // 활성화/비활성화 스타일
   const baseStyle = {
-    border: isActive ? "var(--inset-border)" : "var(--outset-border)",
-    boxShadow: isActive
-      ? "-1px -1px 0 white inset, 1px 1px 0 #707070 inset"
-      : "1px 1px 0 white inset, -1px -1px 0 #707070 inset",
+    border:
+      variant === "outline"
+        ? "1px solid #d0d0d0"
+        : isActive
+        ? "var(--inset-border)"
+        : "var(--outset-border)",
+    boxShadow:
+      variant === "outline"
+        ? "none"
+        : isActive
+        ? "-1px -1px 0 white inset, 1px 1px 0 #707070 inset"
+        : "1px 1px 0 white inset, -1px -1px 0 #707070 inset",
     transform: isActive ? "translate(1px, 1px)" : "translate(0, 0)",
     transition: "transform 0.05s",
     width: fullWidth ? "100%" : "auto",
