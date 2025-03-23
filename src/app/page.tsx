@@ -8,6 +8,9 @@ import { useRouter, usePathname } from "next/navigation";
 import Homepage from "./homepage/page";
 import { Footer } from "@/components/layout/Footer";
 import { WindowLayout } from "@/components/layouts/WindowLayout";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { initializeSupabaseStorage } from "@/lib/supabaseStorage";
 
 // 동적으로 페이지를 불러오기 위해 React.lazy 사용
 import React from "react";
@@ -36,7 +39,7 @@ export default function Home() {
   const [currentUrl, setCurrentUrl] = useState<string>("/desktop");
   const [pageTitle, setPageTitle] = useState<string>("바탕화면");
   const [startMenuOpen, setStartMenuOpen] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { isAuthenticated: isLoggedIn, signOut } = useAuth();
 
   // 페이지 이동 내역 및 현재 위치 추적을 위한 상태
   const [history, setHistory] = useState<string[]>(["/desktop"]);
@@ -53,12 +56,19 @@ export default function Home() {
     }
   }, [pathname]);
 
-  // 로그인 상태를 localStorage에서 가져오기
+  // Supabase 스토리지 초기화
   useEffect(() => {
-    const loggedInState = localStorage.getItem("isLoggedIn");
-    if (loggedInState === "true") {
-      setIsLoggedIn(true);
-    }
+    // 앱이 시작될 때 Supabase 스토리지 초기화
+    const initStorage = async () => {
+      try {
+        await initializeSupabaseStorage();
+        console.log("Supabase 스토리지 초기화 완료");
+      } catch (error) {
+        console.error("Supabase 스토리지 초기화 오류:", error);
+      }
+    };
+
+    initStorage();
   }, []);
 
   // 페이지 제목 설정
@@ -80,7 +90,19 @@ export default function Home() {
 
   // 네비게이션 처리
   const handleNavigation = (path: string) => {
-    // 내부 상태만 업데이트하고 URL을 변경하지 않음
+    // 로그인, 게시글 작성 등은 일반 URL 이동으로 처리
+    const externalRoutePaths = [
+      "/auth/login",
+      "/auth/register",
+      "/posts/write",
+    ];
+
+    if (externalRoutePaths.some((route) => path.startsWith(route))) {
+      router.push(path);
+      return;
+    }
+
+    // 기존 내부 라우팅 처리
     const normalizedPath = path === "/" ? "/desktop" : path;
 
     // 현재 위치에서 앞으로 갔던 기록이 있으면 제거
@@ -133,39 +155,33 @@ export default function Home() {
   };
 
   // 로그인 처리
-  const handleLogin = () => {
-    // 로그인 상태 관리
-    setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
+  const handleLogin = async () => {
+    // 로그인은 LoginPage 컴포넌트에서 처리
     handleNavigation("/desktop");
   };
 
   // 로그아웃 처리
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("isLoggedIn");
+  const handleLogout = async () => {
+    await signOut();
     handleNavigation("/desktop");
   };
 
   // 페이지 컴포넌트 맵핑
   const getPageComponent = () => {
-    // 게시글 작성 페이지 경로를 먼저 확인
-    if (currentUrl === "/posts/write") {
-      return (
-        <React.Suspense fallback={<div>로딩 중...</div>}>
-          <WritePostPage onNavigate={handleNavigation} />
-        </React.Suspense>
-      );
-    }
+    // 게시글 작성 페이지는 더 이상 내부에서 처리하지 않음 (외부 경로로 이동)
 
     // 게시글 상세 페이지 경로 패턴 확인
-    // 숫자뿐 아니라 모든 문자를 포함하는 ID 패턴으로 수정
     const postDetailRegex = /^\/posts\/([^\/]+)$/;
     const match = currentUrl.match(postDetailRegex);
 
     if (match) {
       // 게시글 ID 추출
       const postId = match[1];
+
+      // 게시글 작성 페이지는 제외
+      if (postId === "write") {
+        return <div>페이지를 찾을 수 없습니다.</div>;
+      }
 
       return (
         <React.Suspense fallback={<div>로딩 중...</div>}>
@@ -174,8 +190,10 @@ export default function Home() {
       );
     }
 
+    // 일반 페이지 라우팅
     switch (currentUrl) {
       case "/desktop":
+        // 메인 페이지(홈페이지)는 React.Suspense로 감싸지 않고 직접 렌더링
         return (
           <Homepage isLoggedIn={isLoggedIn} onNavigate={handleNavigation} />
         );
@@ -227,14 +245,7 @@ export default function Home() {
             <MyPage />
           </React.Suspense>
         );
-      case "/auth/login":
-        return (
-          <React.Suspense fallback={<div>로딩 중...</div>}>
-            <WindowLayout title='로그인'>
-              <LoginPage onNavigate={handleNavigation} />
-            </WindowLayout>
-          </React.Suspense>
-        );
+      // 로그인 페이지는 더 이상 내부에서 처리하지 않음 (외부 경로로 이동)
       default:
         return <div>페이지를 찾을 수 없습니다.</div>;
     }
@@ -647,9 +658,26 @@ export default function Home() {
           {/* Windows 98 스타일 작업 표시줄 (창 내부에 위치) */}
           <div className='taskbar'>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <button className='start-button' onClick={toggleStartMenu}>
-                <span style={{ marginRight: "4px" }}>🪟</span> 시작
-              </button>
+              {/* 시작 버튼 */}
+              <div
+                className='start-button'
+                onClick={() => setStartMenuOpen(!startMenuOpen)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "2px 8px",
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: isLoggedIn ? "#80bfff" : "#c0c0c0",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  height: "22px",
+                  color: isLoggedIn ? "#000080" : "#000000",
+                }}
+              >
+                {isLoggedIn ? "👤 시작" : "🪟 시작"}
+              </div>
 
               {/* 시작 메뉴 */}
               {startMenuOpen && (
@@ -684,6 +712,7 @@ export default function Home() {
                   >
                     ✉️ 문의하기
                   </div>
+
                   {isLoggedIn ? (
                     <>
                       <div
@@ -710,9 +739,7 @@ export default function Home() {
             <div style={{ display: "flex", alignItems: "center" }}>
               {isLoggedIn && (
                 <div style={{ marginRight: "10px", fontSize: "11px" }}>
-                  <span style={{ color: "#000080", fontWeight: "bold" }}>
-                    👤 로그인됨
-                  </span>
+                  <span>👤 로그인됨</span>
                 </div>
               )}
               <Clock />

@@ -2,40 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import Image from "next/image";
 
 export default function Header() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
-
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setIsAuthenticated(!!data.session);
-
-        if (data.session) {
-          const { data: userData } = await supabase.auth.getUser();
-          setUser(userData.user);
-        }
-      } catch (err) {
-        console.error("인증 확인 오류:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
+  const { isAuthenticated, user, loading, signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push("/");
   };
 

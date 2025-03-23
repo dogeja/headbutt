@@ -321,347 +321,182 @@ export default function PostDetail({ id, onNavigate }: PostDetailProps) {
     navigate("/posts");
   };
 
-  // 로딩 상태 표시
-  if (isLoading) {
-    return (
-      <div className='p-4'>
-        <div
-          className='window mb-4 max-w-4xl mx-auto'
-          style={{ height: "auto" }}
-        >
-          <div className='window-header'>
-            <span>게시글 로딩 중</span>
-            <div className='window-controls'>
-              <button className='window-control'>─</button>
-              <button className='window-control'>□</button>
-              <button className='window-control'>×</button>
-            </div>
-          </div>
-          <div
-            className='window-content p-4 text-center'
-            style={{ height: "auto", minHeight: "200px" }}
-          >
-            게시글을 불러오는 중입니다...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 게시글이 없는 경우
-  if (!post) {
-    return (
-      <div className='p-4'>
-        <div
-          className='window mb-4 max-w-4xl mx-auto'
-          style={{ height: "auto" }}
-        >
-          <div className='window-header'>
-            <span>알림</span>
-            <div className='window-controls'>
-              <button className='window-control'>─</button>
-              <button className='window-control'>□</button>
-              <button className='window-control'>×</button>
-            </div>
-          </div>
-          <div
-            className='window-content p-4 text-center'
-            style={{ height: "auto", minHeight: "200px" }}
-          >
-            <p style={{ marginBottom: "16px" }}>
-              {error || `요청하신 게시글을 찾을 수 없습니다. (ID: ${id})`}
-            </p>
-            <button
-              onClick={handleBackToList}
-              style={{
-                backgroundColor: "#c0c0c0",
-                border: "solid 2px",
-                borderColor: "#ffffff #808080 #808080 #ffffff",
-                padding: "4px 12px",
-                fontSize: "12px",
-              }}
-            >
-              목록으로
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 날짜 포맷팅
-  const formattedDate = format(new Date(post.created_at), "yyyy.MM.dd");
-
   return (
-    <div className='p-4'>
-      {/* 게시글 상세 */}
-      <div className='window mb-4 max-w-4xl mx-auto' style={{ height: "auto" }}>
+    <div className='container mx-auto p-4 max-w-4xl'>
+      <div className='window mb-4' style={{ height: "auto" }}>
         <div className='window-header'>
-          <span>게시글 상세</span>
+          <span>{post?.title || "게시글 보기"}</span>
           <div className='window-controls'>
             <button className='window-control'>─</button>
             <button className='window-control'>□</button>
             <button className='window-control'>×</button>
           </div>
         </div>
-        <div
-          className='window-content p-4'
-          style={{ height: "auto", minHeight: "auto" }}
-        >
-          {/* 게시글 헤더 */}
-          <div
-            style={{
-              backgroundColor: "#d4d0c8",
-              border: "solid 2px",
-              borderColor: "#808080 #ffffff #ffffff #808080",
-              padding: "12px",
-              marginBottom: "16px",
-            }}
-          >
-            <h1
-              style={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                marginBottom: "8px",
-                color: "#000080",
-              }}
-            >
-              {post.title}
-            </h1>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "12px",
-                color: "#555",
-              }}
-            >
-              <span>작성자: {post.author_name}</span>
-              <span>작성일: {formattedDate}</span>
-              <span>조회수: {post.view_count}</span>
+        <div className='window-content p-4'>
+          {error && (
+            <div className='mb-4 p-2 bg-[#ffebeb] text-[#d00000] border border-[#d00000]'>
+              {error}
             </div>
-          </div>
+          )}
 
-          {/* 게시글 내용 */}
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              border: "solid 2px",
-              borderColor: "#808080 #ffffff #ffffff #808080",
-              padding: "16px",
-              marginBottom: "16px",
-              minHeight: "200px",
-            }}
-          >
-            <p style={{ lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
-              {post.content}
-            </p>
-          </div>
-
-          {/* 댓글 섹션 */}
-          <div
-            style={{
-              backgroundColor: "#f0f0f0",
-              border: "solid 2px",
-              borderColor: "#808080 #ffffff #ffffff #808080",
-              padding: "12px",
-              marginBottom: "16px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "#000080",
-                color: "#ffffff",
-                padding: "4px 8px",
-                marginBottom: "8px",
-                fontWeight: "bold",
-                fontSize: "12px",
-              }}
-            >
-              댓글 ({comments.length})
+          {isLoading ? (
+            <div className='text-center p-10'>
+              <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#000080]'></div>
+              <p className='mt-2'>게시글을 불러오는 중...</p>
             </div>
-            {comments.length > 0 ? (
+          ) : post ? (
+            <>
+              <div className='mb-6'>
+                {/* 뒤로 가기 버튼 */}
+                <button
+                  onClick={handleBackToList}
+                  className='px-3 py-1 mb-4 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
+                >
+                  ← 목록으로
+                </button>
+
+                {/* 게시글 제목 */}
+                <h1 className='text-2xl font-bold mb-2'>{post.title}</h1>
+
+                {/* 게시글 메타 정보 */}
+                <div className='flex flex-wrap justify-between items-center mb-4 text-sm text-gray-700'>
+                  <div>
+                    작성자:{" "}
+                    <span className='font-semibold'>{post.author_name}</span>
+                  </div>
+                  <div className='flex space-x-4'>
+                    <span>조회 {post.view_count}</span>
+                    <span>
+                      작성일:{" "}
+                      {format(new Date(post.created_at), "yyyy-MM-dd HH:mm")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 구분선 */}
+                <hr className='border-t border-[#808080] mb-4' />
+
+                {/* 게시글 내용 */}
+                <div
+                  className='mb-6 whitespace-pre-wrap bg-white p-3 border border-[#d4d0c8]'
+                  style={{ minHeight: "200px" }}
+                >
+                  {post.content}
+                </div>
+              </div>
+
+              {/* 댓글 섹션 */}
               <div>
-                {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    style={{
-                      padding: "8px",
-                      borderBottom: "1px dotted #808080",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <span style={{ fontWeight: "bold", fontSize: "12px" }}>
-                        {comment.author_name}
-                      </span>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <span
-                          style={{
-                            color: "#666",
-                            fontSize: "11px",
-                            marginRight: "8px",
-                          }}
+                <div className='mb-4'>
+                  <h3 className='text-lg font-semibold mb-3 pb-1 border-b border-[#d4d0c8]'>
+                    댓글 ({comments.length})
+                  </h3>
+
+                  {/* 댓글 목록 */}
+                  {comments.length > 0 ? (
+                    <div className='space-y-3'>
+                      {comments.map((comment) => (
+                        <div
+                          key={comment.id}
+                          className='p-3 border border-[#d4d0c8] bg-[#f0f0f0]'
                         >
-                          {format(new Date(comment.created_at), "yyyy.MM.dd")}
-                        </span>
-                        {/* 자신의 댓글인 경우에만 삭제 버튼 표시 */}
-                        {currentUser &&
-                          (currentUser.id === comment.author_id ||
-                            comment.author_id === "local_user") && (
-                            <button
-                              onClick={() => handleDeleteComment(comment.id)}
-                              style={{
-                                backgroundColor: "#c0c0c0",
-                                border: "solid 1px",
-                                borderColor: "#ffffff #808080 #808080 #ffffff",
-                                padding: "2px 4px",
-                                fontSize: "10px",
-                                cursor: "pointer",
-                              }}
-                            >
-                              삭제
-                            </button>
-                          )}
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>
+                              {comment.author_name}
+                            </span>
+                            <span className='text-xs text-gray-500'>
+                              {format(
+                                new Date(comment.created_at),
+                                "yyyy-MM-dd HH:mm"
+                              )}
+                            </span>
+                          </div>
+                          <p className='whitespace-pre-wrap'>
+                            {comment.content}
+                          </p>
+
+                          {/* 현재 사용자의 댓글인 경우 삭제 버튼 표시 */}
+                          {currentUser &&
+                            (comment.author_id === currentUser.id ||
+                              (comment.author_name === currentUser.name &&
+                                comment.author_id === "local_user" &&
+                                currentUser.id === "local_user")) && (
+                              <div className='flex justify-end mt-2'>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteComment(comment.id)
+                                  }
+                                  className='text-xs px-2 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className='text-center py-4 text-gray-500'>
+                      아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+                    </p>
+                  )}
+                </div>
+
+                {/* 댓글 작성 폼 */}
+                {currentUser ? (
+                  <div className='mt-6'>
+                    <h4 className='text-md font-semibold mb-2'>댓글 작성</h4>
+                    <div>
+                      <textarea
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                        className='w-full p-2 border border-[#808080] bg-white mb-2'
+                        style={{
+                          resize: "vertical",
+                          minHeight: "80px",
+                          border: "var(--inset-border)",
+                        }}
+                        placeholder='댓글을 입력하세요'
+                      />
+                      <div className='flex justify-end'>
+                        <button
+                          onClick={handleCommentSubmit}
+                          disabled={isSubmitting || !commentContent.trim()}
+                          className={`px-4 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef] ${
+                            !commentContent.trim()
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          {isSubmitting ? "저장 중..." : "댓글 작성"}
+                        </button>
                       </div>
                     </div>
-                    <p style={{ fontSize: "12px" }}>{comment.content}</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: "8px", color: "#666", fontSize: "12px" }}>
-                아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
-              </div>
-            )}
-
-            {/* 댓글 입력 영역 */}
-            <div
-              style={{
-                marginTop: "16px",
-                padding: "8px",
-                backgroundColor: "#d4d0c8",
-                border: "solid 1px #808080",
-              }}
-            >
-              {currentUser ? (
-                <>
-                  <textarea
-                    style={{
-                      width: "100%",
-                      padding: "4px",
-                      height: "60px",
-                      marginBottom: "8px",
-                      border: "solid 2px",
-                      borderColor: "#808080 #ffffff #ffffff #808080",
-                      resize: "none",
-                      fontSize: "12px",
-                    }}
-                    placeholder='댓글을 입력하세요...'
-                    value={commentContent}
-                    onChange={(e) => setCommentContent(e.target.value)}
-                    disabled={isSubmitting}
-                  ></textarea>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                ) : (
+                  <div className='mt-6 text-center p-3 border border-[#d4d0c8] bg-[#f0f0f0]'>
+                    <p>댓글을 작성하려면 로그인이 필요합니다.</p>
                     <button
-                      style={{
-                        backgroundColor: "#c0c0c0",
-                        border: "solid 2px",
-                        borderColor: "#ffffff #808080 #808080 #ffffff",
-                        padding: "4px 8px",
-                        fontSize: "12px",
-                      }}
-                      onClick={handleCommentSubmit}
-                      disabled={isSubmitting || !commentContent.trim()}
+                      onClick={() => navigate("/auth/login")}
+                      className='mt-2 px-4 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
                     >
-                      {isSubmitting ? "처리 중..." : "등록"}
+                      로그인
                     </button>
                   </div>
-                </>
-              ) : (
-                <div style={{ textAlign: "center", padding: "8px" }}>
-                  <p style={{ marginBottom: "8px", fontSize: "12px" }}>
-                    댓글을 작성하려면 로그인이 필요합니다.
-                  </p>
-                  <button
-                    style={{
-                      backgroundColor: "#c0c0c0",
-                      border: "solid 2px",
-                      borderColor: "#ffffff #808080 #808080 #ffffff",
-                      padding: "4px 12px",
-                      fontSize: "12px",
-                    }}
-                    onClick={() => navigate("/auth/login")}
-                  >
-                    로그인
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 버튼 영역 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <button
-              onClick={handleBackToList}
-              style={{
-                backgroundColor: "#c0c0c0",
-                border: "solid 2px",
-                borderColor: "#ffffff #808080 #808080 #ffffff",
-                padding: "4px 12px",
-                fontSize: "12px",
-              }}
-            >
-              목록으로
-            </button>
-            {currentUser && currentUser.id === post.author_id && (
-              <div>
-                <button
-                  style={{
-                    backgroundColor: "#c0c0c0",
-                    border: "solid 2px",
-                    borderColor: "#ffffff #808080 #808080 #ffffff",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    marginRight: "8px",
-                  }}
-                  onClick={() => navigate(`/posts/${id}/edit`)}
-                >
-                  수정
-                </button>
-                <button
-                  style={{
-                    backgroundColor: "#c0c0c0",
-                    border: "solid 2px",
-                    borderColor: "#ffffff #808080 #808080 #ffffff",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                  }}
-                  onClick={() => {
-                    if (window.confirm("정말 삭제하시겠습니까?")) {
-                      alert(
-                        "게시글이 삭제되었습니다. (실제로는 삭제되지 않습니다)"
-                      );
-                      navigate("/posts");
-                    }
-                  }}
-                >
-                  삭제
-                </button>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className='text-center py-10'>
+              <p>게시글을 찾을 수 없습니다.</p>
+              <button
+                onClick={handleBackToList}
+                className='mt-4 px-4 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
+              >
+                목록으로 돌아가기
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

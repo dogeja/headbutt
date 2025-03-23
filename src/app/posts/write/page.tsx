@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/posts/PostForm";
 import { supabase } from "@/lib/supabase";
 import { createPost } from "@/services/posts";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface WritePostPageProps {
   onNavigate?: (path: string) => void;
@@ -12,42 +13,12 @@ interface WritePostPageProps {
 
 export default function WritePostPage({ onNavigate }: WritePostPageProps) {
   const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // 인증 상태 확인 (localStorage 사용)
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        // 기존 Supabase 인증 로직은 유지하되, localStorage도 확인
-        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-
-        // Supabase에서 현재 로그인된 사용자 확인
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        setIsAuthenticated(!!user || isLoggedIn);
-        setUser(user || { id: "local-user" });
-      } catch (err) {
-        console.error("인증 확인 오류:", err);
-        // localStorage에서 로그인 상태 확인 (폴백)
-        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-        setIsAuthenticated(isLoggedIn);
-        if (isLoggedIn) {
-          setUser({ id: "local-user" });
-        }
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
+  // AuthContext를 활용하여 인증 상태 확인
+  const { isAuthenticated, user, loading } = useAuth();
 
   // 제목과 내용 변경 핸들러
   const handleTitleChange = (newTitle: string) => {
@@ -118,96 +89,75 @@ export default function WritePostPage({ onNavigate }: WritePostPageProps) {
     }
   };
 
-  // 인증 상태 확인 중
-  if (isCheckingAuth) {
+  const renderContent = () => {
+    // 인증 상태 확인 중
+    if (loading) {
+      return (
+        <div className='p-4 text-center'>
+          <p>인증 상태를 확인하는 중입니다...</p>
+        </div>
+      );
+    }
+
+    // 비로그인 상태일 경우 로그인 메시지 표시
+    if (!isAuthenticated) {
+      return (
+        <div className='p-4'>
+          <p className='text-center mb-4'>
+            게시글을 작성하려면 로그인이 필요합니다.
+          </p>
+          <div className='flex justify-center'>
+            <button
+              className='button'
+              style={{ border: "var(--outset-border)" }}
+              onClick={() => navigate("/auth/login")}
+            >
+              로그인 페이지로 이동
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // 로그인 상태일 경우 게시글 작성 폼 표시
     return (
-      <div className='container mx-auto p-4 max-w-4xl'>
-        <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
-        >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>인증 확인 중</span>
-          </div>
-          <div className='p-4 text-center'>
-            <p>인증 상태를 확인하는 중입니다...</p>
-          </div>
+      <div className='p-4'>
+        <h1 className='text-xl font-bold mb-4'>게시글 작성</h1>
+
+        <div className='text-sm mb-6'>
+          <p>카이로스 커뮤니티에 게시글을 작성합니다.</p>
+          <p className='text-xs text-gray-500 mt-2'>
+            * 작성된 글은 모든 회원에게 공개됩니다.
+          </p>
+        </div>
+
+        <div>
+          <PostForm
+            onSubmit={handleSubmit}
+            onTitleChange={handleTitleChange}
+            onContentChange={handleContentChange}
+            title={title}
+            content={content}
+            isSubmitting={isSubmitting}
+            onNavigate={navigate}
+          />
         </div>
       </div>
     );
-  }
+  };
 
-  // 비로그인 상태일 경우 로그인 메시지 표시
-  if (!isAuthenticated) {
-    return (
-      <div className='container mx-auto p-4 max-w-4xl'>
-        <div
-          className='p-4'
-          style={{
-            border: "var(--outset-border)",
-            backgroundColor: "var(--button-face)",
-          }}
-        >
-          <div className='window-header mb-2'>
-            <span className='font-bold'>로그인 필요</span>
-          </div>
-          <div className='p-4'>
-            <p className='text-center mb-4'>
-              게시글을 작성하려면 로그인이 필요합니다.
-            </p>
-            <div className='flex justify-center'>
-              <button
-                className='button'
-                style={{ border: "var(--outset-border)" }}
-                onClick={() => navigate("/auth/login")}
-              >
-                로그인 페이지로 이동
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 로그인 상태일 경우 게시글 작성 폼 표시
   return (
     <div className='container mx-auto p-4 max-w-4xl'>
-      <div
-        className='p-4'
-        style={{
-          border: "var(--outset-border)",
-          backgroundColor: "var(--button-face)",
-        }}
-      >
-        <div className='window-header mb-2'>
-          <span className='font-bold'>게시글 작성</span>
-        </div>
-        <div className='p-4'>
-          <h1 className='text-xl font-bold mb-4'>게시글 작성</h1>
-
-          <div className='text-sm mb-6'>
-            <p>카이로스 커뮤니티에 게시글을 작성합니다.</p>
-            <p className='text-xs text-gray-500 mt-2'>
-              * 작성된 글은 모든 회원에게 공개됩니다.
-            </p>
-          </div>
-
-          <div>
-            <PostForm
-              onSubmit={handleSubmit}
-              onTitleChange={handleTitleChange}
-              onContentChange={handleContentChange}
-              title={title}
-              content={content}
-              isSubmitting={isSubmitting}
-              onNavigate={navigate}
-            />
+      <div className='window mb-4' style={{ height: "auto" }}>
+        <div className='window-header'>
+          <span>게시글 작성</span>
+          <div className='window-controls'>
+            <button className='window-control'>─</button>
+            <button className='window-control'>□</button>
+            <button className='window-control'>×</button>
           </div>
         </div>
+        <div className='window-content p-4'>{renderContent()}</div>
       </div>
     </div>
   );

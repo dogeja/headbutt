@@ -68,7 +68,7 @@ export function LoginForm({ onNavigate }: LoginFormProps) {
 
   return (
     <>
-      <form onSubmit={handleLoginSubmit} className='space-y-4'>
+      <form onSubmit={handleLoginSubmit} className='space-y-6 w-full'>
         <Input
           label='이메일'
           id='email'
@@ -103,7 +103,7 @@ export function LoginForm({ onNavigate }: LoginFormProps) {
         <div className='flex justify-end'>
           <Link
             href='/auth/forgot-password'
-            className='text-sm hover:underline'
+            className='text-sm hover:underline text-blue-800'
           >
             비밀번호를 잊으셨나요?
           </Link>
@@ -118,7 +118,7 @@ export function LoginForm({ onNavigate }: LoginFormProps) {
           로그인
         </Button>
 
-        <div className='my-4 relative'>
+        <div className='my-6 relative'>
           <div className='absolute inset-0 flex items-center'>
             <div className='w-full border-t border-gray-300'></div>
           </div>
@@ -133,7 +133,7 @@ export function LoginForm({ onNavigate }: LoginFormProps) {
           onClick={handleGoogleLogin}
           style={{ width: "100%" }}
           disabled={isLoading}
-          className='flex items-center justify-center gap-2 bg-white hover:bg-gray-100'
+          className='flex items-center justify-center gap-2 bg-white hover:bg-gray-100 border-gray-400 h-11'
         >
           <div className='flex items-center justify-center gap-2'>
             <svg width='20' height='20' viewBox='0 0 24 24'>
@@ -142,14 +142,17 @@ export function LoginForm({ onNavigate }: LoginFormProps) {
                 fill='#4285F4'
               />
             </svg>
-            <span className='text-gray-800'>Google로 로그인</span>
+            <span className='text-gray-800 font-medium'>Google로 로그인</span>
           </div>
         </Button>
 
-        <div className='text-center'>
+        <div className='text-center pt-4'>
           <p className='text-sm'>
             아직 회원이 아니신가요?{" "}
-            <Link href='/auth/register' className='hover:underline'>
+            <Link
+              href='/auth/register'
+              className='text-blue-800 hover:underline font-medium'
+            >
               회원가입
             </Link>
           </p>

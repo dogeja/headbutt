@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useAuth as useAuthContext } from "@/lib/contexts/AuthContext";
 
 export function useAuth() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,9 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
+
+  // AuthContext에서 인증 상태 가져오기
+  const { isAuthenticated, user, signOut: contextSignOut } = useAuthContext();
 
   const router = useRouter();
 
@@ -86,7 +90,7 @@ export function useAuth() {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await supabase.auth.signOut();
+      await contextSignOut();
       router.push("/");
     } catch (error) {
       console.error("로그아웃 오류:", error);
@@ -102,6 +106,8 @@ export function useAuth() {
     setPassword,
     isLoading,
     authError,
+    isAuthenticated,
+    user,
     showEmailConfirmModal,
     setShowEmailConfirmModal,
     handleLogin,

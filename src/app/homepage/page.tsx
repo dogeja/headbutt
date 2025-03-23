@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./homepage.module.css";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface HomepageProps {
   isLoggedIn?: boolean;
@@ -10,9 +11,15 @@ interface HomepageProps {
 }
 
 export default function Homepage({
-  isLoggedIn = false,
+  isLoggedIn: propsIsLoggedIn,
   onNavigate,
 }: HomepageProps) {
+  // AuthContext에서 인증 상태 가져오기 (props보다 우선)
+  const { isAuthenticated } = useAuth();
+  // props의 isLoggedIn이 제공되면 그것을 사용하고, 아니면 context의 값 사용
+  const isLoggedIn =
+    propsIsLoggedIn !== undefined ? propsIsLoggedIn : isAuthenticated;
+
   // 내부 페이지 이동 함수
   const handleNavigation = (path: string) => {
     if (onNavigate) {
@@ -74,19 +81,31 @@ export default function Homepage({
               <p className={styles.iconLabel}>문의하기</p>
             </div>
 
-            <div
-              className='text-center'
-              onClick={() =>
-                handleNavigation(isLoggedIn ? "/mypage" : "/auth/login")
-              }
-            >
-              <div className={styles.desktopIcon}>
-                {isLoggedIn ? "👤" : "🔑"}
+            {isLoggedIn ? (
+              <div
+                className='text-center'
+                onClick={() => handleNavigation("/mypage")}
+              >
+                <div className={styles.desktopIcon}>
+                  <span role='img' aria-label='My Page'>
+                    👤
+                  </span>
+                </div>
+                <p className={styles.iconLabel}>마이페이지</p>
               </div>
-              <p className={styles.iconLabel}>
-                {isLoggedIn ? "마이페이지" : "로그인"}
-              </p>
-            </div>
+            ) : (
+              <div
+                className='text-center'
+                onClick={() => handleNavigation("/auth/login")}
+              >
+                <div className={styles.desktopIcon}>
+                  <span role='img' aria-label='Login'>
+                    🔑
+                  </span>
+                </div>
+                <p className={styles.iconLabel}>로그인</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -517,60 +536,6 @@ export default function Homepage({
                 더 보기...
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 환영 메시지 */}
-      <div className={`${styles.window} max-w-3xl mx-auto`}>
-        <div className={styles.windowHeader}>
-          <span>환영합니다</span>
-          <div className={styles.windowControls}>
-            <button className={styles.windowControl}>─</button>
-            <button className={styles.windowControl}>□</button>
-            <button className={styles.windowControl}>×</button>
-          </div>
-        </div>
-        <div className={`${styles.windowContent} text-center`}>
-          <div
-            style={{
-              padding: "16px",
-              backgroundColor: "#ffffcc",
-              border: "solid 2px",
-              borderColor: "#808080 #ffffff #ffffff #808080",
-              marginBottom: "10px",
-            }}
-          >
-            <p className='mb-4'>워터베어러에 오신 것을 환영합니다!</p>
-            <p>
-              지금{" "}
-              <a
-                href='#'
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/auth/register");
-                }}
-                style={{ color: "#0000ff", fontWeight: "bold" }}
-              >
-                회원가입
-              </a>
-              을 하시고 다양한 서비스를 이용해보세요.
-            </p>
-          </div>
-
-          <div className='flex justify-center gap-6 mt-4 mb-0'>
-            <button
-              onClick={() => handleNavigation("/posts")}
-              className={styles.winButton}
-            >
-              커뮤니티 방문하기
-            </button>
-            <button
-              onClick={() => handleNavigation("/faq")}
-              className={styles.winButton}
-            >
-              자주 묻는 질문
-            </button>
           </div>
         </div>
       </div>

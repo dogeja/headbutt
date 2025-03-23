@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <div className='relative'>
           <input
             ref={ref}
-            className={`w-full p-2 border rounded transition-colors duration-200 ${
+            className={`w-full p-2.5 border rounded transition-colors duration-200 text-base ${
               hasError
                 ? "border-red-500 pr-8"
                 : isSuccess
@@ -39,6 +39,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             style={{
               border:
                 !hasError && !isSuccess ? "var(--inset-border)" : undefined,
+              height: "38px",
             }}
             {...props}
           />

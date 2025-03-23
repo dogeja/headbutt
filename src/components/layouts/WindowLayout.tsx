@@ -11,11 +11,11 @@ interface WindowLayoutProps {
 }
 
 const maxWidthMap = {
-  xs: "max-w-xs",
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
+  xs: "max-w-xs", // 320px
+  sm: "max-w-sm", // 384px
+  md: "max-w-md", // 448px
+  lg: "max-w-2xl", // 672px (기존 lg보다 크게 설정)
+  xl: "max-w-4xl", // 896px
   full: "w-full",
 };
 
@@ -38,8 +38,14 @@ export function WindowLayout({
     return <>{children}</>;
   }
 
+  // 로그인 페이지인 경우 특별한 클래스 적용
+  const isAuthPage = pathname?.startsWith("/auth");
+  const containerClasses = isAuthPage
+    ? "flex justify-center items-center min-h-[80vh]"
+    : "flex justify-center items-start py-10";
+
   return (
-    <div className='flex justify-center items-start py-10 px-4'>
+    <div className={`${containerClasses} px-4`}>
       <div className={`window ${maxWidthMap[maxWidth]}`}>
         {showHeader && (
           <div className='window-header'>
@@ -51,7 +57,7 @@ export function WindowLayout({
             </div>
           </div>
         )}
-        <div className='window-content p-6'>{children}</div>
+        <div className='window-content p-4 sm:p-6'>{children}</div>
       </div>
     </div>
   );

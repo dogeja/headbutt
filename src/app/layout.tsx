@@ -3,7 +3,8 @@ import "@/styles/index.css";
 import type { Metadata } from "next";
 import { Inter, VT323 } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { WindowLayout } from "@/components/layouts/WindowLayout";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
+import { GlobalStyles } from "@/components/GlobalStyles";
 
 // 기본 글꼴 및 복고풍 글꼴 불러오기
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -44,7 +45,8 @@ export default function RootLayout({
         )}
         style={{ backgroundColor: "#008080", margin: 0, padding: 0 }}
       >
-        {children}
+        <GlobalStyles />
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

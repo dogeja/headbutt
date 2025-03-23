@@ -19,6 +19,7 @@ const recentlyViewedPosts: { [key: string]: number } = {};
  * 게시글 목록 조회 함수
  */
 export const getPosts = async (): Promise<Post[]> => {
+  console.log("getPosts 함수 호출됨");
   try {
     // 1. 먼저 기본 게시글 정보만 가져오기
     const { data: postsData, error: postsError } = await supabase
@@ -26,8 +27,37 @@ export const getPosts = async (): Promise<Post[]> => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (postsError) throw postsError;
+    console.log("posts 테이블 조회 결과:", {
+      데이터: postsData?.length || 0,
+      오류: postsError,
+    });
 
+    if (postsError) {
+      console.error("게시글 조회 오류:", postsError);
+      throw postsError;
+    }
+
+    if (!postsData || postsData.length === 0) {
+      console.log("게시글이 없거나 데이터를 가져오지 못했습니다.");
+      return [];
+    }
+
+    // 댓글 수 조회를 별도로 처리하지 않고 기본 게시글 정보만 반환
+    // 성능 향상을 위해 일단 게시글을 화면에 표시하는 것이 우선
+    console.log("댓글 정보 조회를 생략하고 기본 게시글 정보만 반환합니다.");
+
+    const postsWithDefaultValues = postsData.map((post) => ({
+      ...post,
+      comment_count: 0, // 기본값 설정
+      author_name: post.author_name || "알 수 없음", // author_name이 없는 경우 기본값 설정
+    }));
+
+    console.log(
+      `총 ${postsWithDefaultValues.length}개의 게시글을 가져왔습니다.`
+    );
+    return postsWithDefaultValues;
+
+    /* 원래 코드는 주석 처리
     // 2. 각 게시글의 댓글 수 가져오기
     const postsWithComments = await Promise.all(
       postsData.map(async (post) => {
@@ -38,10 +68,20 @@ export const getPosts = async (): Promise<Post[]> => {
             .select("*", { count: "exact", head: true })
             .eq("post_id", post.id);
 
-          if (countError) throw countError;
+          if (countError) {
+            console.error(
+              `게시글 ID:${post.id}의 댓글 수 조회 중 오류:`,
+              countError
+            );
+            // 오류가 있더라도 게시글 정보는 반환
+            return {
+              ...post,
+              comment_count: 0,
+            };
+          }
 
           // 작성자 정보 조회 (가능한 경우)
-          let authorName = post.author_name;
+          let authorName = post.author_name || "알 수 없음";
           try {
             const { data: profileData } = await supabase
               .from("profiles")
@@ -50,11 +90,15 @@ export const getPosts = async (): Promise<Post[]> => {
               .single();
 
             if (profileData) {
-              authorName = profileData.full_name || profileData.username;
+              authorName =
+                profileData.full_name || profileData.username || authorName;
             }
           } catch (profileErr) {
             // 프로필 정보를 가져오지 못해도 게시글 표시에는 영향 없음
-            console.log("프로필 정보 로드 중 오류:", profileErr);
+            console.log(
+              `게시글 ID:${post.id}의 작성자 정보 로드 중 오류:`,
+              profileErr
+            );
           }
 
           return {
@@ -73,7 +117,11 @@ export const getPosts = async (): Promise<Post[]> => {
       })
     );
 
+    console.log(
+      `총 ${postsWithComments.length}개의 게시글을 성공적으로 가져왔습니다.`
+    );
     return postsWithComments;
+    */
   } catch (err) {
     console.error("게시글 목록 조회 중 상세 오류:", err);
     throw err;

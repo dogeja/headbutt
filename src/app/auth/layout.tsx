@@ -11,5 +11,5 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <WindowLayout maxWidth='md'>{children}</WindowLayout>;
+  return <WindowLayout maxWidth='lg'>{children}</WindowLayout>;
 }

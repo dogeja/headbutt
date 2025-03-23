@@ -1,15 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import Image from "next/image";
 
 export default function Taskbar() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const { isAuthenticated, loading, signOut } = useAuth();
 
   useEffect(() => {
     // 모바일 체크
@@ -20,18 +19,6 @@ export default function Taskbar() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    // 인증 상태 확인
-    async function checkAuth() {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setIsAuthenticated(!!data.session);
-      } catch (err) {
-        console.error("인증 확인 오류:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     // 시계 업데이트
     const updateClock = () => {
       const now = new Date();
@@ -40,9 +27,7 @@ export default function Taskbar() {
       setCurrentTime(`${hours}:${minutes}`);
     };
 
-    checkAuth();
     updateClock();
-
     const intervalId = setInterval(updateClock, 60000); // 1분마다 시간 업데이트
 
     return () => {
@@ -52,7 +37,7 @@ export default function Taskbar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     window.location.href = "/";
     setIsMenuOpen(false);
   };
@@ -242,7 +227,9 @@ export default function Taskbar() {
               <div className='py-2 px-1'>
                 <div className='mb-1 px-2 text-sm font-bold'>사용자</div>
 
-                {isAuthenticated ? (
+                {loading ? (
+                  <div className='px-2 py-1'>로딩 중...</div>
+                ) : isAuthenticated ? (
                   <>
                     {/* 내 정보 메뉴 항목 */}
                     <Link href='/mypage'>

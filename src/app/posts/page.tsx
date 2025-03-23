@@ -8,6 +8,7 @@ import { getPosts } from "@/services/posts";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { format } from "date-fns";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 // Post 타입 정의
 type Post = {
@@ -26,23 +27,33 @@ interface PostsPageProps {
 
 export default function PostsPage({ onNavigate }: PostsPageProps) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "popular">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState<"title" | "content" | "author">(
+    "title"
+  );
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [error, setError] = useState("");
 
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+
   useEffect(() => {
     async function loadPosts() {
+      console.log("게시글 로드 시작");
       setIsLoading(true);
       setError("");
 
       try {
         // 실제 데이터베이스에서 게시글 데이터 가져오기 시도
+        console.log("getPosts 함수 호출 전");
         const postsData = await getPosts();
-        setPosts(postsData);
+        console.log("가져온 게시글 데이터:", postsData);
+        setPosts(postsData || []); // null이나 undefined인 경우 빈 배열로 처리
       } catch (err) {
         console.error("게시글 불러오기 오류:", err);
         setError("데이터베이스 연결에 실패했습니다. 샘플 데이터를 표시합니다.");
@@ -121,9 +132,10 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
 
     async function checkAuth() {
       try {
+        console.log("사용자 인증 확인 시작");
         const { data } = await supabase.auth.getUser();
+        console.log("인증된 사용자:", data.user);
         setCurrentUser(data.user);
-        setIsAuthenticated(true);
       } catch (err) {
         console.error("인증 확인 오류:", err);
       }
@@ -135,11 +147,22 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
 
   // 게시글 필터링 및 정렬 기능
   const filteredPosts = posts
-    .filter(
-      (post) =>
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.author_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter((post) => {
+      if (searchTerm.trim() === "") return true;
+
+      if (searchType === "title") {
+        return post.title.toLowerCase().includes(searchTerm.toLowerCase());
+      } else if (searchType === "content") {
+        return (
+          post.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          false
+        );
+      } else {
+        return post.author_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      }
+    })
     .sort((a, b) => {
       if (activeTab === "popular") {
         return b.view_count - a.view_count;
@@ -148,6 +171,15 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     });
+
+  // 페이지네이션 처리 - posts가 비어있을 때도 대응
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPosts.length / postsPerPage)
+  ); // 최소 1페이지
 
   // 게시글 클릭 처리
   const handlePostClick = (postId: string) => {
@@ -158,250 +190,304 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
     }
   };
 
+  // 글쓰기 버튼 클릭 처리
+  const handleWriteButtonClick = () => {
+    if (onNavigate) {
+      onNavigate("/posts/write");
+    } else {
+      router.push("/posts/write");
+    }
+  };
+
+  // 페이지 변경 처리
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // 페이지 상단으로 스크롤
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 검색 처리
+  const handleSearch = () => {
+    setCurrentPage(1); // 검색 시 첫 페이지로 이동
+  };
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    // 오늘 작성된 글이면 시간만 표시
+    if (date.toDateString() === now.toDateString()) {
+      return `${date.getHours().toString().padStart(2, "0")}:${date
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
+    // 올해 작성된 글이면 월/일 표시
+    if (date.getFullYear() === now.getFullYear()) {
+      return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
+
+    // 그 외에는 연/월/일 표시
+    return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
+  };
+
   return (
-    <div className='container mx-auto p-4 max-w-6xl'>
-      <div
-        className='p-4'
-        style={{
-          border: "var(--outset-border)",
-          backgroundColor: "var(--button-face)",
-        }}
-      >
-        <div className='window-header mb-4 flex justify-between items-center'>
-          <span className='font-bold text-lg'>커뮤니티 게시판</span>
-          {isAuthenticated && (
-            <button
-              className='button-3d px-4 py-1 text-sm'
-              style={{
-                border: "var(--outset-border)",
-                background: "var(--button-face)",
-                boxShadow: "2px 2px 0 var(--button-shadow)",
-              }}
-              onClick={() =>
-                onNavigate
-                  ? onNavigate("/posts/write")
-                  : router.push("/posts/write")
-              }
-            >
-              글쓰기
-            </button>
+    <div className='container mx-auto p-4 max-w-4xl'>
+      <div className='window mb-4' style={{ height: "auto" }}>
+        <div className='window-header'>
+          <span>커뮤니티</span>
+          <div className='window-controls'>
+            <button className='window-control'>─</button>
+            <button className='window-control'>□</button>
+            <button className='window-control'>×</button>
+          </div>
+        </div>
+
+        <div className='window-content p-4'>
+          {error && (
+            <div className='mb-4 p-2 bg-[#ffebeb] text-[#d00000] border border-[#d00000]'>
+              {error}
+            </div>
           )}
-        </div>
 
-        {/* 검색 및 필터링 영역 */}
-        <div
-          className='mb-6 p-4'
-          style={{
-            border: "solid 2px",
-            borderColor: "#ffffff #808080 #808080 #ffffff",
-            backgroundColor: "#c0c0c0",
-          }}
-        >
-          <div className='flex flex-col sm:flex-row gap-4 justify-between'>
-            {/* 검색 */}
-            <div className='w-full sm:w-1/2'>
-              <div className='flex items-center'>
-                <div
-                  style={{
-                    border: "solid 2px",
-                    borderColor: "#808080 #ffffff #ffffff #808080",
-                    backgroundColor: "white",
-                    padding: "4px",
-                    flexGrow: 1,
-                    display: "flex",
-                  }}
-                >
-                  <input
-                    type='text'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder='제목 또는 작성자 검색...'
-                    className='w-full outline-none bg-transparent'
-                    style={{
-                      border: "none",
-                      fontFamily:
-                        '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                      fontSize: "12px",
-                    }}
-                  />
-                  {searchTerm && (
-                    <button onClick={() => setSearchTerm("")} className='ml-2'>
-                      ✖
-                    </button>
-                  )}
-                </div>
-                <button
-                  className='ml-2 px-2 py-1'
-                  style={{
-                    border: "solid 2px",
-                    borderColor: "#ffffff #808080 #808080 #ffffff",
-                    backgroundColor: "#c0c0c0",
-                    outline: "1px solid black",
-                    outlineOffset: "-1px",
-                  }}
-                >
-                  🔍
-                </button>
-              </div>
+          {/* 디버깅용 정보 표시 (개발 중에만 사용) */}
+          {process.env.NODE_ENV === "development" && (
+            <div className='mb-4 p-2 bg-[#f0f0f0] border border-[#808080] text-xs'>
+              <div>총 게시글 수: {posts.length}</div>
+              <div>필터링된 게시글 수: {filteredPosts.length}</div>
+              <div>현재 페이지: {currentPage}</div>
+              <div>현재 표시 게시글 수: {currentPosts.length}</div>
             </div>
+          )}
 
-            {/* 탭 필터 */}
-            <div className='flex gap-2'>
-              <button
-                className={`px-3 py-1`}
-                style={{
-                  border: activeTab === "all" ? "solid 2px" : "solid 2px",
-                  borderColor:
-                    activeTab === "all"
-                      ? "#808080 #ffffff #ffffff #808080"
-                      : "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor: activeTab === "all" ? "#d4d0c8" : "#c0c0c0",
-                  outline: "1px solid black",
-                  outlineOffset: "-1px",
-                }}
-                onClick={() => setActiveTab("all")}
-              >
-                최신순
-              </button>
-              <button
-                className={`px-3 py-1`}
-                style={{
-                  border: activeTab === "popular" ? "solid 2px" : "solid 2px",
-                  borderColor:
-                    activeTab === "popular"
-                      ? "#808080 #ffffff #ffffff #808080"
-                      : "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor:
-                    activeTab === "popular" ? "#d4d0c8" : "#c0c0c0",
-                  outline: "1px solid black",
-                  outlineOffset: "-1px",
-                }}
-                onClick={() => setActiveTab("popular")}
-              >
-                인기순
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 커뮤니티 가이드라인 */}
-        <div className='mb-6'>
-          <details>
-            <summary
-              className='p-3 cursor-pointer'
-              style={{
-                border: "solid 2px",
-                borderColor: "#ffffff #808080 #808080 #ffffff",
-                backgroundColor: "#c0c0c0",
-                fontFamily:
-                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                outline: "1px solid black",
-                outlineOffset: "-1px",
-              }}
-            >
-              <h2
-                className='text-lg font-bold inline-block'
-                style={{
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  fontSize: "14px",
-                }}
-              >
-                커뮤니티 가이드라인
-              </h2>
-            </summary>
-            <div
-              className='p-4 mt-1'
-              style={{
-                border: "solid 2px",
-                borderColor: "#808080 #ffffff #ffffff #808080",
-                backgroundColor: "white",
-              }}
-            >
-              <ul
-                className='list-disc pl-6'
-                style={{
-                  fontSize: "12px",
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                }}
-              >
-                <li>타인을 존중하는 언어를 사용해주세요.</li>
-                <li>도움이 되는 정보를 공유해주세요.</li>
-                <li>광고 및 스팸성 게시글은 삭제될 수 있습니다.</li>
-                <li>민감한 개인정보는 공유하지 마세요.</li>
-              </ul>
-            </div>
-          </details>
-        </div>
-
-        {/* 게시글 목록 */}
-        {isLoading ? (
-          <div className='text-center py-8'>
-            <p>게시글을 불러오는 중입니다...</p>
-          </div>
-        ) : error ? (
-          <div className='text-center py-8'>
-            <p className='text-red-600'>{error}</p>
+          {/* 탭 메뉴 */}
+          <div className='flex mb-4 border-b border-[#808080]'>
             <button
-              className='mt-2 text-blue-600 hover:underline'
-              onClick={() => window.location.reload()}
+              className={`px-4 py-2 mr-1 ${
+                activeTab === "all"
+                  ? "bg-[#d4d0c8] border-t border-l border-r border-[#808080]"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("all")}
             >
-              다시 시도하기
+              최신순
+            </button>
+            <button
+              className={`px-4 py-2 ${
+                activeTab === "popular"
+                  ? "bg-[#d4d0c8] border-t border-l border-r border-[#808080]"
+                  : ""
+              }`}
+              onClick={() => setActiveTab("popular")}
+            >
+              인기순
             </button>
           </div>
-        ) : posts.length === 0 ? (
-          <div className='text-center py-8'>
-            <p>로그인 후 게시글을 확인해보세요 </p>
-          </div>
-        ) : (
-          <PostList
-            posts={filteredPosts}
-            isLoading={isLoading}
-            isAuthenticated={isAuthenticated}
-            onNavigate={onNavigate}
-          />
-        )}
-      </div>
 
-      {/* 바닥글 */}
-      <div
-        className='mt-6 p-3 text-xs'
-        style={{
-          border: "solid 2px",
-          borderColor: "#ffffff #808080 #808080 #ffffff",
-          backgroundColor: "#c0c0c0",
-          fontFamily:
-            '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-          fontSize: "12px",
-        }}
-      >
-        <div className='flex flex-col sm:flex-row justify-between items-center'>
-          <div className='mb-2 sm:mb-0'>
-            <span className='font-bold'>빠른 링크:</span>
-            <Link
-              href='/'
-              className='ml-2 underline'
-              style={{ color: "#0000ff" }}
-            >
-              홈
-            </Link>
-            <Link
-              href='/auth/login'
-              className='ml-2 underline'
-              style={{ color: "#0000ff" }}
-            >
-              로그인
-            </Link>
-            <Link
-              href='/faq'
-              className='ml-2 underline'
-              style={{ color: "#0000ff" }}
-            >
-              FAQ
-            </Link>
+          {/* 검색 기능 */}
+          <div className='flex flex-col sm:flex-row mb-4 gap-2'>
+            <div className='flex sm:w-auto w-full'>
+              <select
+                className='mr-2 bg-[#d4d0c8] border border-[#808080] px-2 py-1'
+                value={searchType}
+                onChange={(e) =>
+                  setSearchType(
+                    e.target.value as "title" | "content" | "author"
+                  )
+                }
+              >
+                <option value='title'>제목</option>
+                <option value='content'>내용</option>
+                <option value='author'>작성자</option>
+              </select>
+              <input
+                type='text'
+                className='flex-1 px-2 py-1 border border-[#808080] bg-white'
+                placeholder='검색어를 입력하세요'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button
+                className='ml-2 px-4 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]'
+                onClick={handleSearch}
+              >
+                검색
+              </button>
+            </div>
+            <div className='sm:ml-auto'>
+              {isAuthenticated && (
+                <button
+                  className='px-4 py-1 w-full sm:w-auto bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
+                  onClick={handleWriteButtonClick}
+                >
+                  ✍️ 글쓰기
+                </button>
+              )}
+            </div>
           </div>
-          <p>문의사항은 admin@waterbearer.io로 연락주세요.</p>
+
+          {isLoading ? (
+            <div className='text-center p-10'>
+              <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#000080]'></div>
+              <p className='mt-2'>게시글을 불러오는 중...</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className='text-center p-10'>
+              <p>게시글이 없습니다.</p>
+            </div>
+          ) : (
+            <>
+              {/* 데스크탑 테이블 (모바일에서는 숨김) */}
+              <div className='hidden sm:block'>
+                <table className='w-full border-collapse'>
+                  <thead>
+                    <tr className='bg-[#d4d0c8]'>
+                      <th className='w-16 p-1 text-left border-b border-[#808080] font-bold'>
+                        No
+                      </th>
+                      <th className='p-1 text-left border-b border-[#808080] font-bold'>
+                        제목
+                      </th>
+                      <th className='w-24 p-1 text-left border-b border-[#808080] font-bold'>
+                        작성자
+                      </th>
+                      <th className='w-32 p-1 text-left border-b border-[#808080] font-bold'>
+                        날짜
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentPosts.map((post, index) => (
+                      <tr
+                        key={post.id}
+                        className='hover:bg-[#efefef] cursor-pointer'
+                        onClick={() => handlePostClick(post.id)}
+                      >
+                        <td className='p-1 border-b border-[#d4d0c8]'>
+                          {indexOfFirstPost + index + 1}
+                        </td>
+                        <td className='p-1 border-b border-[#d4d0c8]'>
+                          <div className='flex items-center'>
+                            <span className='text-[#000080] hover:underline'>
+                              {post.title || "제목 없음"}
+                            </span>
+                            {(post.comment_count ?? 0) > 0 && (
+                              <span className='text-[#d00000] ml-2'>
+                                [{post.comment_count}]
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className='p-1 border-b border-[#d4d0c8]'>
+                          {post.author_name || "알 수 없음"}
+                        </td>
+                        <td className='p-1 border-b border-[#d4d0c8]'>
+                          {formatDate(post.created_at)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 모바일 카드 레이아웃 (데스크탑에서는 숨김) */}
+              <div className='sm:hidden'>
+                {currentPosts.map((post, index) => (
+                  <div
+                    key={post.id}
+                    className='mb-2 p-2 border border-[#d4d0c8] cursor-pointer hover:bg-[#efefef]'
+                    onClick={() => handlePostClick(post.id)}
+                  >
+                    <div className='flex justify-between items-start'>
+                      <span className='text-[#000080] font-semibold'>
+                        {post.title || "제목 없음"}
+                      </span>
+                      {(post.comment_count ?? 0) > 0 && (
+                        <span className='text-[#d00000] text-sm'>
+                          [{post.comment_count}]
+                        </span>
+                      )}
+                    </div>
+                    <div className='mt-1 text-sm text-gray-600 flex justify-between'>
+                      <span>{post.author_name || "알 수 없음"}</span>
+                      <span>{formatDate(post.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 페이지네이션 */}
+              {totalPages > 1 && (
+                <div className='flex flex-wrap justify-center items-center mt-6'>
+                  <button
+                    onClick={() =>
+                      currentPage > 1 && handlePageChange(currentPage - 1)
+                    }
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 mx-1 ${
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
+                  >
+                    이전
+                  </button>
+
+                  {/* 모바일에서는 현재 페이지 주변 페이지만 표시 */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((num) => {
+                      // 모바일에서는 현재 페이지 전후 1개만 표시
+                      if (window.innerWidth < 640) {
+                        return (
+                          num === 1 ||
+                          num === totalPages ||
+                          Math.abs(num - currentPage) <= 1
+                        );
+                      }
+                      // 데스크탑에서는 전후 2개까지 표시
+                      return (
+                        num === 1 ||
+                        num === totalPages ||
+                        Math.abs(num - currentPage) <= 2
+                      );
+                    })
+                    .map((num, idx, array) => (
+                      <React.Fragment key={num}>
+                        {idx > 0 && array[idx - 1] !== num - 1 && (
+                          <span className='mx-1'>...</span>
+                        )}
+                        <button
+                          onClick={() => handlePageChange(num)}
+                          className={`px-3 py-1 mx-1 ${
+                            currentPage === num
+                              ? "bg-[#000080] text-white"
+                              : "bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]"
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      </React.Fragment>
+                    ))}
+
+                  <button
+                    onClick={() =>
+                      currentPage < totalPages &&
+                      handlePageChange(currentPage + 1)
+                    }
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1 mx-1 ${
+                      currentPage === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
+                  >
+                    다음
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

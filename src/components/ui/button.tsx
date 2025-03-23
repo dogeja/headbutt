@@ -27,8 +27,8 @@ export function Button({
   // 사이즈별 패딩
   const sizeClasses = {
     sm: "px-2 py-1 text-sm",
-    md: "px-3 py-1.5",
-    lg: "px-4 py-2 text-lg",
+    md: "px-3 py-2",
+    lg: "px-4 py-2.5 text-lg",
   };
 
   // 컬러 변형
