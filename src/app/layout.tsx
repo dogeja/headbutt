@@ -5,6 +5,7 @@ import { Inter, VT323 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { GlobalStyles } from "@/components/GlobalStyles";
+import BrowserLayout from "@/components/layouts/BrowserLayout";
 
 // 기본 글꼴 및 복고풍 글꼴 불러오기
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -15,15 +16,15 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "워터베어러 - 지속의 지혜, 흐름의 철학",
-  description: "워터베어러를 통해 지속 가능한 삶의 철학을 만나보세요.",
+  title: "워터베어러",
+  description: "지속의 지혜, 흐름의 철학",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang='ko'>
       <head>
@@ -46,7 +47,9 @@ export default function RootLayout({
         style={{ backgroundColor: "#008080", margin: 0, padding: 0 }}
       >
         <GlobalStyles />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <BrowserLayout>{children}</BrowserLayout>
+        </AuthProvider>
       </body>
     </html>
   );

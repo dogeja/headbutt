@@ -45,6 +45,32 @@ export default function Home() {
   const [history, setHistory] = useState<string[]>(["/desktop"]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
+  // 중복해서 사용되는 스타일 - 컴포넌트 내부에 직접 정의
+  const borderStyle = {
+    border: "solid 2px",
+    borderColor: "#808080 #ffffff #ffffff #808080",
+    padding: "8px",
+    textShadow: "none",
+  };
+
+  // 버튼 스타일
+  const winButtonStyle = {
+    backgroundColor: "#c0c0c0",
+    border: "2px solid",
+    borderColor: "#ffffff #808080 #808080 #ffffff",
+    padding: "4px 10px",
+    fontSize: "14px",
+    cursor: "pointer",
+    outline: "1px solid black",
+    outlineOffset: "-1px",
+    textShadow: "none",
+  };
+
+  const textStyle = {
+    textShadow: "none",
+    fontFamily: '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+  };
+
   // 초기 URL 설정
   useEffect(() => {
     // 실제 URL이 변경될 때 우리의 내부 URL 상태 업데이트
@@ -259,497 +285,332 @@ export default function Home() {
   };
 
   return (
-    <div className='min-h-screen bg-teal-600 flex flex-col items-center justify-between p-2 sm:p-4'>
-      {/* 전체 페이지에 적용될 전역 스타일 */}
-      <style jsx global>{`
-        body {
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          background-color: #008080;
-          background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFUSURBVGhD7ZJBDoMgEEWZ6NILlN6oN+LYrQfw2HgOYIXGGCIwTBkYJP+RX1hgmPcqoiiKojRhH7h/Hnu3i+ORTcswbMfx2w7+Xf1tGsYpV23DNkWvCbZQwDZoIW+LVqvI7YkWC0YKRQvFCgULxQsFCiUJBQklCwUI5QlpFsoVehXSJqQhpEVIS0iDkKaQ1C4kvTFK70LPC0nvohOFnoUSO+pMoUehTKFnoQKh6NNWulDpGUq5ojXnqVQoR6xdCBXKEesXSolBQqlivUJJMVgoJ9YnlB2DhXJj/4VKxCChktj/QiUxWKg09luoJrYECUnEvgtJxGChFrG2QtKxJVIo3FtISuyJEHreDEtIKvZ8Fw8h+SHIwrPQktirhQqE3i9UGvsUqhB6f3yUxl4Wqon1CdXE+oRqYn1CNbE+oZpYn1BNrE+oJtYnVBNFURTlR4zhArVc+uDQY7cKAAAAAElFTkSuQmCC");
-          background-repeat: repeat;
-        }
-        @media (max-width: 640px) {
-          body {
-            overflow: auto;
-          }
-        }
-        .window {
-          height: auto !important;
-          overflow: visible !important;
-          max-height: none !important;
-          box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .window-header {
-          background: linear-gradient(to right, #000080, #1084d0);
-          color: white;
-          font-weight: bold;
-          padding: 3px 5px;
-          display: flex;
-          justify-content: space-between;
-          font-size: 12px;
-        }
-        .window-controls {
-          display: flex;
-          gap: 2px;
-        }
-        .window-control {
-          width: 16px;
-          height: 14px;
-          background-color: #c0c0c0;
-          border: 1px solid;
-          border-color: #dfdfdf #808080 #808080 #dfdfdf;
-          font-size: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-        }
-        .window-content {
-          height: auto !important;
-          min-height: 0 !important;
-          display: flex;
-          flex-direction: column;
-          overflow: visible !important;
-          padding-bottom: 0 !important;
-          background-color: #c0c0c0;
-        }
-        .window-content > div {
-          margin-bottom: 0 !important;
-        }
-        .browser-window {
-          width: 100%;
-          max-width: 800px;
-          height: 90vh;
-          max-height: 600px;
-          margin: 0 auto;
-          border: 2px solid #c0c0c0;
-          border-radius: 0;
-          background-color: #c0c0c0;
-          display: flex;
-          flex-direction: column;
-          box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
-            inset -2px -2px grey, inset 2px 2px #fff;
-          overflow: hidden;
-        }
-        @media (max-width: 640px) {
-          .browser-window {
-            height: 100vh;
-            max-height: none;
-            border: none;
-          }
-        }
-        .browser-content {
-          flex: 1;
-          background-color: #d5d5d5;
-          border: 2px inset #808080;
-          overflow: auto;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-        }
-        .desktop-view {
-          padding: 8px;
-          flex: 1;
-          overflow: auto;
-        }
-        .iframe-container {
-          flex: 1;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          background-color: white;
-        }
-        .iframe-container iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
-        /* 윈도우 98 스타일 스크롤바 */
-        .browser-content::-webkit-scrollbar,
-        .desktop-view::-webkit-scrollbar {
-          width: 16px;
-          height: 16px;
-        }
-        .browser-content::-webkit-scrollbar-track,
-        .desktop-view::-webkit-scrollbar-track {
-          background-color: #c0c0c0;
-        }
-        .browser-content::-webkit-scrollbar-thumb,
-        .desktop-view::-webkit-scrollbar-thumb {
-          background-color: #c0c0c0;
-          border: 1px solid #808080;
-          border-top-color: #dfdfdf;
-          border-left-color: #dfdfdf;
-        }
-        .browser-content::-webkit-scrollbar-button,
-        .desktop-view::-webkit-scrollbar-button {
-          display: block;
-          height: 16px;
-          width: 16px;
-          background-color: #c0c0c0;
-          border: 1px solid #808080;
-          border-top-color: #dfdfdf;
-          border-left-color: #dfdfdf;
-          box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff;
-        }
-        .browser-content::-webkit-scrollbar-button:vertical:start:decrement,
-        .desktop-view::-webkit-scrollbar-button:vertical:start:decrement {
-          background-position: center 4px;
-          background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 6L5 2L9 6' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-        }
-        .browser-content::-webkit-scrollbar-button:vertical:end:increment,
-        .desktop-view::-webkit-scrollbar-button:vertical:end:increment {
-          background-position: center 4px;
-          background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4L5 8L9 4' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-        }
-        .desktop-icons-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-          gap: 8px;
-          padding: 8px;
-        }
-        @media (max-width: 640px) {
-          .desktop-icons-container {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-        .desktop-icon {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          width: 70px;
-          cursor: pointer;
-        }
-        .desktop-icon-img {
-          width: 32px;
-          height: 32px;
-          background-color: #ececec;
-          border: 1px solid #808080;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-        .desktop-icon-label {
-          font-size: 11px;
-          color: #000000;
-        }
-        .taskbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: #c0c0c0;
-          border-top: solid 2px #808080;
-          padding: 2px 4px;
-          font-size: 12px;
-          height: 28px;
-          min-height: 28px;
-          position: relative;
-        }
-        .start-button {
-          background-color: #c0c0c0;
-          border: solid 2px;
-          border-color: #ffffff #808080 #808080 #ffffff;
-          padding: 2px 8px;
-          margin-right: 8px;
-          font-size: 12px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          cursor: pointer;
-        }
-        .start-menu {
-          position: absolute;
-          bottom: 28px;
-          left: 0;
-          width: 200px;
-          background-color: #c0c0c0;
-          border: solid 2px;
-          border-color: #ffffff #808080 #808080 #ffffff;
-          box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.3);
-          z-index: 1000;
-        }
-        .start-menu-item {
-          padding: 8px 12px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          border-bottom: 1px solid #808080;
-        }
-        .start-menu-item:hover {
-          background-color: #000080;
-          color: white;
-        }
-        .url-input {
-          flex-grow: 1;
-          border: solid 2px;
-          border-color: #808080 #ffffff #ffffff #808080;
-          background-color: #ffffff;
-          height: 24px;
-          padding: 2px 8px;
-          display: flex;
-          align-items: center;
-          font-size: 12px;
-        }
-        .nav-button {
-          width: 24px;
-          height: 24px;
-          border: solid 2px;
-          border-color: #ffffff #808080 #808080 #ffffff;
-          background-color: #c0c0c0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          cursor: pointer;
-        }
-        .nav-button:disabled {
-          color: #808080;
-          cursor: default;
-          opacity: 0.6;
-        }
-        .main-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          width: 100%;
-        }
-      `}</style>
-
-      <div className='main-container'>
-        {/* Windows 98 스타일 브라우저 창 */}
-        <div className='browser-window'>
-          {/* 메뉴 바 */}
+    <div className='space-y-6' style={textStyle}>
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-start'>
+        <div className='feature-card'>
           <div
             style={{
-              backgroundColor: "#c0c0c0",
-              borderBottom: "solid 1px #808080",
-              padding: "2px 4px",
-              display: "flex",
-              fontSize: "12px",
+              position: "relative",
+              border: "solid 2px",
+              borderColor: "#808080 #ffffff #ffffff #808080",
+              padding: "8px",
+              backgroundColor: "#f0f0f0",
+              ...textStyle,
             }}
           >
             <div
               style={{
-                padding: "2px 8px",
-                backgroundColor: "#c0c0c0",
-                marginRight: "4px",
-                borderTop: "solid 1px #ffffff",
-                borderLeft: "solid 1px #ffffff",
-                borderRight: "solid 1px #808080",
-                borderBottom: "solid 1px #808080",
+                backgroundColor: "#000080",
+                color: "#ffffff",
+                padding: "2px 4px",
+                marginBottom: "8px",
+                fontWeight: "bold",
+                fontSize: "12px",
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
               }}
             >
-              파일
+              이미지 뷰어 - cleanthes.png
             </div>
-            <div
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "#c0c0c0",
-                marginRight: "4px",
-                borderTop: "solid 1px #ffffff",
-                borderLeft: "solid 1px #ffffff",
-                borderRight: "solid 1px #808080",
-                borderBottom: "solid 1px #808080",
-              }}
-            >
-              편집
-            </div>
-            <div
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "#c0c0c0",
-                marginRight: "4px",
-                borderTop: "solid 1px #ffffff",
-                borderLeft: "solid 1px #ffffff",
-                borderRight: "solid 1px #808080",
-                borderBottom: "solid 1px #808080",
-              }}
-            >
-              보기
-            </div>
-            <div
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "#c0c0c0",
-                marginRight: "4px",
-                borderTop: "solid 1px #ffffff",
-                borderLeft: "solid 1px #ffffff",
-                borderRight: "solid 1px #808080",
-                borderBottom: "solid 1px #808080",
-              }}
-            >
-              북마크
-            </div>
-            <div
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "#c0c0c0",
-                marginRight: "4px",
-                borderTop: "solid 1px #ffffff",
-                borderLeft: "solid 1px #ffffff",
-                borderRight: "solid 1px #808080",
-                borderBottom: "solid 1px #808080",
-              }}
-            >
-              도움말
-            </div>
-          </div>
 
-          {/* 네비게이션 툴바 */}
-          <div
-            style={{
-              backgroundColor: "#c0c0c0",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              borderBottom: "solid 1px #808080",
-            }}
-          >
-            <button
-              className='nav-button'
-              onClick={handleBack}
-              disabled={!canGoBack()}
-              title='뒤로가기'
-            >
-              ◀
-            </button>
-            <button
-              className='nav-button'
-              onClick={handleForward}
-              disabled={!canGoForward()}
-              title='앞으로가기'
-            >
-              ▶
-            </button>
-            <button
-              className='nav-button'
-              onClick={() => {
-                handleNavigation(currentUrl);
-              }}
-              title='새로고침'
-            >
-              ↻
-            </button>
             <div
               style={{
-                height: "24px",
-                width: "1px",
-                backgroundColor: "#808080",
-                margin: "0 4px",
+                border: "solid 1px",
+                borderColor: "#808080 #ffffff #ffffff #808080",
+                padding: "4px",
+                backgroundColor: "#ffffff",
+                position: "relative",
+                maxHeight: "350px",
+                overflow: "hidden",
               }}
-            ></div>
-            <div className='url-input'>{getCurrentDisplayUrl()}</div>
-            <button className='nav-button'>🔍</button>
-          </div>
-
-          {/* 브라우저 콘텐츠 영역 */}
-          <div className='browser-content'>
-            {/* 현재 URL에 따라 페이지 컨텐츠 렌더링 */}
-            {getPageComponent()}
-          </div>
-
-          {/* Windows 98 스타일 작업 표시줄 (창 내부에 위치) */}
-          <div className='taskbar'>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {/* 시작 버튼 */}
-              <div
-                className='start-button'
-                onClick={() => setStartMenuOpen(!startMenuOpen)}
+            >
+              <Image
+                src='/images/projects/info_img01.png'
+                alt='cleanthes'
+                width={300}
+                height={400}
+                className='rounded-lg'
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "2px 8px",
+                  objectFit: "cover",
+                  margin: "0 auto",
+                  border: "solid 1px #000000",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "8px",
+                marginTop: "8px",
+              }}
+            >
+              <button
+                style={{
                   border: "solid 2px",
                   borderColor: "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor: isLoggedIn ? "#80bfff" : "#c0c0c0",
+                  backgroundColor: "#c0c0c0",
+                  padding: "2px 8px",
                   fontSize: "12px",
-                  fontWeight: "bold",
-                  height: "22px",
-                  color: isLoggedIn ? "#000080" : "#000000",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
                 }}
               >
-                {isLoggedIn ? "👤 시작" : "🪟 시작"}
-              </div>
-
-              {/* 시작 메뉴 */}
-              {startMenuOpen && (
-                <div className='start-menu'>
-                  <div
-                    className='start-menu-item'
-                    onClick={() => handleNavigation("/work")}
-                  >
-                    📁 내 작업
-                  </div>
-                  <div
-                    className='start-menu-item'
-                    onClick={() => handleNavigation("/posts")}
-                  >
-                    💬 커뮤니티
-                  </div>
-                  <div
-                    className='start-menu-item'
-                    onClick={() => handleNavigation("/about")}
-                  >
-                    ℹ️ 정보
-                  </div>
-                  <div
-                    className='start-menu-item'
-                    onClick={() => handleNavigation("/faq")}
-                  >
-                    ❓ FAQ
-                  </div>
-                  <div
-                    className='start-menu-item'
-                    onClick={() => handleNavigation("/contact")}
-                  >
-                    ✉️ 문의하기
-                  </div>
-
-                  {isLoggedIn ? (
-                    <>
-                      <div
-                        className='start-menu-item'
-                        onClick={() => handleNavigation("/mypage")}
-                      >
-                        👤 마이페이지
-                      </div>
-                      <div className='start-menu-item' onClick={handleLogout}>
-                        🚪 로그아웃
-                      </div>
-                    </>
-                  ) : (
-                    <div
-                      className='start-menu-item'
-                      onClick={() => handleNavigation("/auth/login")}
-                    >
-                      🔑 로그인
-                    </div>
-                  )}
-                </div>
-              )}
+                확대
+              </button>
+              <button
+                style={{
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: "#c0c0c0",
+                  padding: "2px 8px",
+                  fontSize: "12px",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
+                }}
+              >
+                축소
+              </button>
+              <button
+                style={{
+                  border: "solid 2px",
+                  borderColor: "#ffffff #808080 #808080 #ffffff",
+                  backgroundColor: "#c0c0c0",
+                  padding: "2px 8px",
+                  fontSize: "12px",
+                  fontFamily:
+                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                  outline: "1px solid black",
+                  outlineOffset: "-1px",
+                }}
+              >
+                저장
+              </button>
             </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {isLoggedIn && (
-                <div style={{ marginRight: "10px", fontSize: "11px" }}>
-                  <span>👤 로그인됨</span>
-                </div>
-              )}
-              <Clock />
-            </div>
+
+            <p
+              className='text-sm mt-4 text-center text-secondary'
+              style={{
+                fontSize: "12px",
+                fontFamily:
+                  '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+                padding: "4px",
+                backgroundColor: "#ffffcc",
+                border: "solid 1px #808080",
+              }}
+            >
+              "기회는 다가올 때 앞에서 잡아야 하며, 지나가면 다시 붙잡을 수
+              없다"
+            </p>
+          </div>
+        </div>
+        <div>
+          <h1
+            className='text-2xl font-bold mb-6'
+            style={{
+              fontFamily:
+                '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
+              color: "#000080",
+              textShadow: "none",
+            }}
+          >
+            워터베어러 - 지속의 지혜, 흐름의 철학
+          </h1>
+          <div style={borderStyle}>
+            <p className='mb-6 text-secondary'>
+              워터베어러(WaterBearer)는 고대 그리스 철학자 클레안테스의
+              이야기에서 영감을 얻었습니다. '물 긷는 자'라는 별명으로 불리던
+              그는 낮에는 철학을 배우고 밤에는 물을 길어 나르며 지속가능한
+              방식으로 자기계발을 이루어냈습니다.
+              <br />
+              <br />
+              우리는 현대인의 삶에 이러한 지속가능한 리듬과 의미 있는 노력을
+              접목시키는 도구를 제공합니다. 끊임없는 알림과 압박 속에서도 자신의
+              리듬을 찾고 진정한 가치에 집중할 수 있도록 돕습니다.
+            </p>
+          </div>
+          <div className='flex gap-4 mt-4'>
+            <button style={winButtonStyle} onClick={() => router.push("/work")}>
+              서비스 살펴보기
+            </button>
+            <button
+              style={winButtonStyle}
+              onClick={() => router.push("/about")}
+            >
+              더 알아보기
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 푸터 - 모니터 외부로 이동 */}
-      <Footer onNavigate={handleNavigation} />
+      {/* 서비스 소개 */}
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-start'>
+        {/* 좌측 메뉴 */}
+        <div className='service-menu' style={borderStyle}>
+          <div className='mb-2 font-bold'>서비스 목록:</div>
+          {[
+            {
+              icon: "💡",
+              title: "영감 기록",
+              desc: "순간의 아이디어를 놓치지 않다",
+              path: "/work",
+            },
+            {
+              icon: "🏃‍♂️",
+              title: "건강 관리",
+              desc: "작은 변화가 쌓여 큰 힘이 되다",
+              path: "/about",
+            },
+            {
+              icon: "✨",
+              title: "함께하기",
+              desc: "더 나은 변화를 함께 만들다",
+              path: "/contact",
+            },
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className='menu-item p-2 hover:bg-gray-200'
+              onClick={() => router.push(item.path)}
+              style={{
+                backgroundColor: "#d4d0c8",
+                marginBottom: "4px",
+                border: "solid 1px",
+                borderColor: "#808080 #ffffff #ffffff #808080",
+                cursor: "pointer",
+              }}
+            >
+              <span className='text-lg font-bold'>
+                {item.icon} {item.title}
+              </span>
+              <p className='text-sm text-secondary'>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* 우측 정보 패널 */}
+        <div className='info-panel' style={borderStyle}>
+          <h2 className='text-xl font-bold mb-4' style={{ color: "#000080" }}>
+            우리의 약속
+          </h2>
+          <div
+            className='value-list'
+            style={{
+              backgroundColor: "#ffffff",
+              padding: "8px",
+              border: "solid 1px",
+              borderColor: "#808080 #ffffff #ffffff #808080",
+            }}
+          >
+            <div
+              className='value-item'
+              style={{
+                borderBottom: "1px dotted #999",
+                paddingBottom: "4px",
+                marginBottom: "4px",
+              }}
+            >
+              <span className='font-bold'>▶ 핵심 가치</span>
+              <p>
+                정말 중요한 일에 에너지를 집중하고, 나머지는 과감히 내려놓을 수
+                있는 지혜를 추구합니다.
+              </p>
+            </div>
+            <div className='value-item' style={{ paddingBottom: "4px" }}>
+              <span className='font-bold'>▶ 지향점</span>
+              <p>
+                단기적인 생산성 폭발이 아닌, 평생 유지할 수 있는 건강한 생산성
+                습관을 형성합니다.
+              </p>
+            </div>
+          </div>
+          <div
+            className='quote-box'
+            style={{
+              backgroundColor: "#ffffcc",
+              border: "1px solid #999",
+              padding: "8px",
+              marginTop: "12px",
+            }}
+          >
+            <p className='text-sm italic'>
+              "워터베어러 - 지속의 지혜, 흐름의 철학"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 공지사항 섹션 */}
+      <div
+        style={{
+          border: "solid 2px",
+          borderColor: "#808080 #ffffff #ffffff #808080",
+          padding: "8px",
+          backgroundColor: "#ffffff",
+          marginBottom: "0",
+        }}
+      >
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#c0c0c0" }}>
+              <th
+                style={{
+                  padding: "4px",
+                  border: "solid 1px #808080",
+                  textAlign: "left",
+                  fontWeight: "bold",
+                }}
+              >
+                날짜
+              </th>
+              <th
+                style={{
+                  padding: "4px",
+                  border: "solid 1px #808080",
+                  textAlign: "left",
+                  fontWeight: "bold",
+                }}
+              >
+                제목
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { date: "2023.12.15", title: "워터베어러 서비스 업데이트 안내" },
+              { date: "2023.11.20", title: "신규 회원 이벤트 안내" },
+              { date: "2023.10.05", title: "워터베어러 커뮤니티 오픈 안내" },
+            ].map((notice, idx) => (
+              <tr
+                key={idx}
+                style={{ backgroundColor: idx % 2 === 1 ? "#f0f0f0" : "" }}
+              >
+                <td style={{ padding: "4px", border: "solid 1px #808080" }}>
+                  {notice.date}
+                </td>
+                <td style={{ padding: "4px", border: "solid 1px #808080" }}>
+                  <span
+                    className='cursor-pointer text-blue-700 hover:underline'
+                    onClick={() => router.push("/posts")}
+                  >
+                    {notice.title}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className='text-right mt-2'>
+          <button onClick={() => router.push("/posts")} style={winButtonStyle}>
+            더 보기...
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

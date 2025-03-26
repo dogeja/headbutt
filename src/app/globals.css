@@ -143,6 +143,9 @@
     background-color: #008080; /* 윈도우 98 배경색 */
     margin: 0;
     padding: 0;
+    text-shadow: none !important; /* 모든 텍스트 그림자 제거 */
+    font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+    color: #000000;
   }
 }
 
@@ -309,4 +312,33 @@ a:visited {
     max-width: 100%;
     margin: 0;
   }
+}
+
+/* Windows 98 스타일 통일 */
+.win98-text {
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+  text-shadow: none;
+  color: #000000;
+}
+
+.win98-window {
+  background-color: #c0c0c0;
+  border: 3px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  box-shadow: 1px 1px 0 0 #000000;
+}
+
+.win98-button {
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+}
+
+.win98-button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
 }

@@ -299,3 +299,120 @@ export async function deletePost(id: string) {
 
   return true;
 }
+
+// 게시글 ID로 단일 게시글 가져오기
+export async function getPostById(postId: string) {
+  try {
+    console.log("게시글 ID 조회:", postId);
+
+    // 게시글 데이터 가져오기
+    const { data: post, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("id", postId)
+      .single();
+
+    if (error) {
+      console.error("게시글 조회 오류:", error);
+      return null;
+    }
+
+    if (!post) {
+      console.log("게시글을 찾을 수 없음");
+      return null;
+    }
+
+    // 작성자 정보 가져오기
+    let authorName = "알 수 없음";
+    try {
+      const { data: author } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", post.author_id)
+        .single();
+
+      if (author && author.full_name) {
+        authorName = author.full_name;
+      }
+    } catch (error) {
+      console.error("작성자 정보 조회 오류:", error);
+    }
+
+    // 댓글 수 조회하기
+    let commentCount = 0;
+    try {
+      const { data: comments } = await supabase
+        .from("comments")
+        .select("id")
+        .eq("post_id", postId);
+
+      if (comments) {
+        commentCount = comments.length;
+      }
+    } catch (error) {
+      console.error("댓글 수 조회 오류:", error);
+    }
+
+    // 조회된 데이터 반환
+    return {
+      ...post,
+      author_name: authorName,
+      comment_count: commentCount,
+    };
+  } catch (error) {
+    console.error("게시글 조회 중 오류 발생:", error);
+    return null;
+  }
+}
+
+// 게시글 ID로 댓글 가져오기
+export async function getCommentsByPostId(postId: string) {
+  try {
+    console.log("댓글 조회:", postId);
+
+    // 댓글 가져오기
+    const { data: comments, error } = await supabase
+      .from("comments")
+      .select("*")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("댓글 조회 오류:", error);
+      return [];
+    }
+
+    // 댓글이 없으면 빈 배열 반환
+    if (!comments || comments.length === 0) {
+      return [];
+    }
+
+    // 각 댓글에 작성자 정보 추가
+    const commentsWithAuthor = await Promise.all(
+      comments.map(async (comment) => {
+        try {
+          const { data: author } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", comment.author_id)
+            .single();
+
+          return {
+            ...comment,
+            author_name: author?.full_name || "알 수 없음",
+          };
+        } catch (error) {
+          return {
+            ...comment,
+            author_name: "알 수 없음",
+          };
+        }
+      })
+    );
+
+    return commentsWithAuthor;
+  } catch (error) {
+    console.error("댓글 조회 중 오류:", error);
+    return [];
+  }
+}

@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import styles from "../homepage/homepage.module.css";
 
 // Post 타입 정의
 type Post = {
@@ -183,11 +184,8 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
 
   // 게시글 클릭 처리
   const handlePostClick = (postId: string) => {
-    if (onNavigate) {
-      onNavigate(`/posts/${postId}`);
-    } else {
-      router.push(`/posts/${postId}`);
-    }
+    console.log("게시글 클릭:", postId);
+    router.push(`/posts/${postId}`);
   };
 
   // 글쓰기 버튼 클릭 처리
@@ -234,259 +232,173 @@ export default function PostsPage({ onNavigate }: PostsPageProps) {
   };
 
   return (
-    <div className='container mx-auto p-4 max-w-4xl'>
-      <div className='window mb-4' style={{ height: "auto" }}>
-        <div className='window-header'>
+    <div className={styles.container}>
+      <div className={styles.window}>
+        <div className={styles.windowHeader}>
           <span>커뮤니티</span>
-          <div className='window-controls'>
-            <button className='window-control'>─</button>
-            <button className='window-control'>□</button>
-            <button className='window-control'>×</button>
+          <div className={styles.windowControls}>
+            <button className={styles.windowControl}>─</button>
+            <button className={styles.windowControl}>□</button>
+            <button className={styles.windowControl}>×</button>
           </div>
         </div>
-
-        <div className='window-content p-4'>
-          {error && (
-            <div className='mb-4 p-2 bg-[#ffebeb] text-[#d00000] border border-[#d00000]'>
-              {error}
-            </div>
-          )}
-
-          {/* 디버깅용 정보 표시 (개발 중에만 사용) */}
-          {process.env.NODE_ENV === "development" && (
-            <div className='mb-4 p-2 bg-[#f0f0f0] border border-[#808080] text-xs'>
-              <div>총 게시글 수: {posts.length}</div>
-              <div>필터링된 게시글 수: {filteredPosts.length}</div>
-              <div>현재 페이지: {currentPage}</div>
-              <div>현재 표시 게시글 수: {currentPosts.length}</div>
-            </div>
-          )}
-
-          {/* 탭 메뉴 */}
-          <div className='flex mb-4 border-b border-[#808080]'>
-            <button
-              className={`px-4 py-2 mr-1 ${
-                activeTab === "all"
-                  ? "bg-[#d4d0c8] border-t border-l border-r border-[#808080]"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("all")}
-            >
-              최신순
-            </button>
-            <button
-              className={`px-4 py-2 ${
-                activeTab === "popular"
-                  ? "bg-[#d4d0c8] border-t border-l border-r border-[#808080]"
-                  : ""
-              }`}
-              onClick={() => setActiveTab("popular")}
-            >
-              인기순
-            </button>
-          </div>
-
-          {/* 검색 기능 */}
-          <div className='flex flex-col sm:flex-row mb-4 gap-2'>
-            <div className='flex sm:w-auto w-full'>
-              <select
-                className='mr-2 bg-[#d4d0c8] border border-[#808080] px-2 py-1'
-                value={searchType}
-                onChange={(e) =>
-                  setSearchType(
-                    e.target.value as "title" | "content" | "author"
-                  )
-                }
-              >
-                <option value='title'>제목</option>
-                <option value='content'>내용</option>
-                <option value='author'>작성자</option>
-              </select>
-              <input
-                type='text'
-                className='flex-1 px-2 py-1 border border-[#808080] bg-white'
-                placeholder='검색어를 입력하세요'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              />
+        <div className={styles.windowContent}>
+          <div className='flex justify-between items-center mb-4'>
+            <h1 className='text-xl font-bold'>게시글 목록</h1>
+            {isAuthenticated && (
               <button
-                className='ml-2 px-4 py-1 bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]'
-                onClick={handleSearch}
+                className={styles.winButton}
+                onClick={() => router.push("/posts/write")}
               >
-                검색
+                글쓰기
               </button>
-            </div>
-            <div className='sm:ml-auto'>
-              {isAuthenticated && (
-                <button
-                  className='px-4 py-1 w-full sm:w-auto bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080] hover:bg-[#efefef]'
-                  onClick={handleWriteButtonClick}
-                >
-                  ✍️ 글쓰기
-                </button>
-              )}
-            </div>
+            )}
           </div>
 
-          {isLoading ? (
-            <div className='text-center p-10'>
-              <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#000080]'></div>
-              <p className='mt-2'>게시글을 불러오는 중...</p>
-            </div>
-          ) : filteredPosts.length === 0 ? (
-            <div className='text-center p-10'>
-              <p>게시글이 없습니다.</p>
-            </div>
-          ) : (
-            <>
-              {/* 데스크탑 테이블 (모바일에서는 숨김) */}
-              <div className='hidden sm:block'>
-                <table className='w-full border-collapse'>
-                  <thead>
-                    <tr className='bg-[#d4d0c8]'>
-                      <th className='w-16 p-1 text-left border-b border-[#808080] font-bold'>
-                        No
-                      </th>
-                      <th className='p-1 text-left border-b border-[#808080] font-bold'>
-                        제목
-                      </th>
-                      <th className='w-24 p-1 text-left border-b border-[#808080] font-bold'>
-                        작성자
-                      </th>
-                      <th className='w-32 p-1 text-left border-b border-[#808080] font-bold'>
-                        날짜
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentPosts.map((post, index) => (
-                      <tr
-                        key={post.id}
-                        className='hover:bg-[#efefef] cursor-pointer'
-                        onClick={() => handlePostClick(post.id)}
-                      >
-                        <td className='p-1 border-b border-[#d4d0c8]'>
-                          {indexOfFirstPost + index + 1}
-                        </td>
-                        <td className='p-1 border-b border-[#d4d0c8]'>
-                          <div className='flex items-center'>
-                            <span className='text-[#000080] hover:underline'>
-                              {post.title || "제목 없음"}
-                            </span>
-                            {(post.comment_count ?? 0) > 0 && (
-                              <span className='text-[#d00000] ml-2'>
-                                [{post.comment_count}]
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className='p-1 border-b border-[#d4d0c8]'>
-                          {post.author_name || "알 수 없음"}
-                        </td>
-                        <td className='p-1 border-b border-[#d4d0c8]'>
-                          {formatDate(post.created_at)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* 모바일 카드 레이아웃 (데스크탑에서는 숨김) */}
-              <div className='sm:hidden'>
+          {/* 게시글 목록 테이블 */}
+          <div className='overflow-x-auto'>
+            <table className='w-full border-collapse'>
+              <thead>
+                <tr className='bg-[#d4d0c8]'>
+                  <th className='w-16 p-1 text-left border-b border-[#808080] font-bold'>
+                    No
+                  </th>
+                  <th className='p-1 text-left border-b border-[#808080] font-bold'>
+                    제목
+                  </th>
+                  <th className='w-24 p-1 text-left border-b border-[#808080] font-bold'>
+                    작성자
+                  </th>
+                  <th className='w-32 p-1 text-left border-b border-[#808080] font-bold'>
+                    날짜
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {currentPosts.map((post, index) => (
-                  <div
+                  <tr
                     key={post.id}
-                    className='mb-2 p-2 border border-[#d4d0c8] cursor-pointer hover:bg-[#efefef]'
+                    className='cursor-pointer hover:bg-[#ececec]'
                     onClick={() => handlePostClick(post.id)}
                   >
-                    <div className='flex justify-between items-start'>
-                      <span className='text-[#000080] font-semibold'>
-                        {post.title || "제목 없음"}
-                      </span>
-                      {(post.comment_count ?? 0) > 0 && (
-                        <span className='text-[#d00000] text-sm'>
-                          [{post.comment_count}]
+                    <td className='p-1 border-b border-[#d4d0c8]'>
+                      {indexOfFirstPost + index + 1}
+                    </td>
+                    <td className='p-1 border-b border-[#d4d0c8]'>
+                      <div className='flex items-center'>
+                        <span className='text-[#000080] hover:underline'>
+                          {post.title || "제목 없음"}
                         </span>
-                      )}
-                    </div>
-                    <div className='mt-1 text-sm text-gray-600 flex justify-between'>
-                      <span>{post.author_name || "알 수 없음"}</span>
-                      <span>{formatDate(post.created_at)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 페이지네이션 */}
-              {totalPages > 1 && (
-                <div className='flex flex-wrap justify-center items-center mt-6'>
-                  <button
-                    onClick={() =>
-                      currentPage > 1 && handlePageChange(currentPage - 1)
-                    }
-                    disabled={currentPage === 1}
-                    className={`px-3 py-1 mx-1 ${
-                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                    } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
-                  >
-                    이전
-                  </button>
-
-                  {/* 모바일에서는 현재 페이지 주변 페이지만 표시 */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((num) => {
-                      // 모바일에서는 현재 페이지 전후 1개만 표시
-                      if (window.innerWidth < 640) {
-                        return (
-                          num === 1 ||
-                          num === totalPages ||
-                          Math.abs(num - currentPage) <= 1
-                        );
-                      }
-                      // 데스크탑에서는 전후 2개까지 표시
-                      return (
-                        num === 1 ||
-                        num === totalPages ||
-                        Math.abs(num - currentPage) <= 2
-                      );
-                    })
-                    .map((num, idx, array) => (
-                      <React.Fragment key={num}>
-                        {idx > 0 && array[idx - 1] !== num - 1 && (
-                          <span className='mx-1'>...</span>
+                        {(post.comment_count ?? 0) > 0 && (
+                          <span className='text-[#d00000] ml-2'>
+                            [{post.comment_count}]
+                          </span>
                         )}
-                        <button
-                          onClick={() => handlePageChange(num)}
-                          className={`px-3 py-1 mx-1 ${
-                            currentPage === num
-                              ? "bg-[#000080] text-white"
-                              : "bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      </React.Fragment>
-                    ))}
+                      </div>
+                    </td>
+                    <td className='p-1 border-b border-[#d4d0c8]'>
+                      {post.author_name || "알 수 없음"}
+                    </td>
+                    <td className='p-1 border-b border-[#d4d0c8]'>
+                      {formatDate(post.created_at)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                  <button
-                    onClick={() =>
-                      currentPage < totalPages &&
-                      handlePageChange(currentPage + 1)
-                    }
-                    disabled={currentPage === totalPages}
-                    className={`px-3 py-1 mx-1 ${
-                      currentPage === totalPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
-                  >
-                    다음
-                  </button>
+          {/* ... 모바일 뷰 ... */}
+          <div className='md:hidden space-y-4 mt-4'>
+            {currentPosts.map((post) => (
+              <div
+                key={post.id}
+                className='p-3 border border-[#d4d0c8] rounded cursor-pointer hover:bg-[#ececec]'
+                onClick={() => handlePostClick(post.id)}
+              >
+                <div className='flex justify-between items-start'>
+                  <span className='text-[#000080] font-semibold'>
+                    {post.title || "제목 없음"}
+                  </span>
+                  {(post.comment_count ?? 0) > 0 && (
+                    <span className='text-[#d00000] text-sm'>
+                      [{post.comment_count}]
+                    </span>
+                  )}
                 </div>
-              )}
-            </>
+                <div className='mt-1 text-sm text-gray-600 flex justify-between'>
+                  <span>{post.author_name || "알 수 없음"}</span>
+                  <span>{formatDate(post.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ... 페이지네이션 ... */}
+          {totalPages > 1 && (
+            <div className='flex flex-wrap justify-center items-center mt-6'>
+              <button
+                onClick={() =>
+                  currentPage > 1 && handlePageChange(currentPage - 1)
+                }
+                disabled={currentPage === 1}
+                className={`px-3 py-1 mx-1 ${
+                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
+              >
+                이전
+              </button>
+
+              {/* 모바일에서는 현재 페이지 주변 페이지만 표시 */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((num) => {
+                  // 모바일에서는 현재 페이지 전후 1개만 표시
+                  if (window.innerWidth < 640) {
+                    return (
+                      num === 1 ||
+                      num === totalPages ||
+                      Math.abs(num - currentPage) <= 1
+                    );
+                  }
+                  // 데스크탑에서는 전후 2개까지 표시
+                  return (
+                    num === 1 ||
+                    num === totalPages ||
+                    Math.abs(num - currentPage) <= 2
+                  );
+                })
+                .map((num, idx, array) => (
+                  <React.Fragment key={num}>
+                    {idx > 0 && array[idx - 1] !== num - 1 && (
+                      <span className='mx-1'>...</span>
+                    )}
+                    <button
+                      onClick={() => handlePageChange(num)}
+                      className={`px-3 py-1 mx-1 ${
+                        currentPage === num
+                          ? "bg-[#000080] text-white"
+                          : "bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]"
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  </React.Fragment>
+                ))}
+
+              <button
+                onClick={() =>
+                  currentPage < totalPages && handlePageChange(currentPage + 1)
+                }
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 mx-1 ${
+                  currentPage === totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                } bg-[#d4d0c8] border border-[#ffffff] border-r-[#808080] border-b-[#808080]`}
+              >
+                다음
+              </button>
+            </div>
           )}
         </div>
       </div>
