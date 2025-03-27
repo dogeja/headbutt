@@ -345,53 +345,7 @@ export default function Home() {
                 gap: "8px",
                 marginTop: "8px",
               }}
-            >
-              <button
-                style={{
-                  border: "solid 2px",
-                  borderColor: "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor: "#c0c0c0",
-                  padding: "2px 8px",
-                  fontSize: "12px",
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  outline: "1px solid black",
-                  outlineOffset: "-1px",
-                }}
-              >
-                확대
-              </button>
-              <button
-                style={{
-                  border: "solid 2px",
-                  borderColor: "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor: "#c0c0c0",
-                  padding: "2px 8px",
-                  fontSize: "12px",
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  outline: "1px solid black",
-                  outlineOffset: "-1px",
-                }}
-              >
-                축소
-              </button>
-              <button
-                style={{
-                  border: "solid 2px",
-                  borderColor: "#ffffff #808080 #808080 #ffffff",
-                  backgroundColor: "#c0c0c0",
-                  padding: "2px 8px",
-                  fontSize: "12px",
-                  fontFamily:
-                    '"MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif',
-                  outline: "1px solid black",
-                  outlineOffset: "-1px",
-                }}
-              >
-                저장
-              </button>
-            </div>
+            ></div>
 
             <p
               className='text-sm mt-4 text-center text-secondary'
@@ -542,73 +496,6 @@ export default function Home() {
               "워터베어러 - 지속의 지혜, 흐름의 철학"
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* 공지사항 섹션 */}
-      <div
-        style={{
-          border: "solid 2px",
-          borderColor: "#808080 #ffffff #ffffff #808080",
-          padding: "8px",
-          backgroundColor: "#ffffff",
-          marginBottom: "0",
-        }}
-      >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#c0c0c0" }}>
-              <th
-                style={{
-                  padding: "4px",
-                  border: "solid 1px #808080",
-                  textAlign: "left",
-                  fontWeight: "bold",
-                }}
-              >
-                날짜
-              </th>
-              <th
-                style={{
-                  padding: "4px",
-                  border: "solid 1px #808080",
-                  textAlign: "left",
-                  fontWeight: "bold",
-                }}
-              >
-                제목
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { date: "2023.12.15", title: "워터베어러 서비스 업데이트 안내" },
-              { date: "2023.11.20", title: "신규 회원 이벤트 안내" },
-              { date: "2023.10.05", title: "워터베어러 커뮤니티 오픈 안내" },
-            ].map((notice, idx) => (
-              <tr
-                key={idx}
-                style={{ backgroundColor: idx % 2 === 1 ? "#f0f0f0" : "" }}
-              >
-                <td style={{ padding: "4px", border: "solid 1px #808080" }}>
-                  {notice.date}
-                </td>
-                <td style={{ padding: "4px", border: "solid 1px #808080" }}>
-                  <span
-                    className='cursor-pointer text-blue-700 hover:underline'
-                    onClick={() => router.push("/posts")}
-                  >
-                    {notice.title}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className='text-right mt-2'>
-          <button onClick={() => router.push("/posts")} style={winButtonStyle}>
-            더 보기...
-          </button>
         </div>
       </div>
     </div>

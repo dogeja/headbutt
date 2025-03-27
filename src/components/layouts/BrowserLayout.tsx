@@ -173,10 +173,10 @@ export default function BrowserLayout({
               {/* 시작 메뉴 헤더 */}
               <div className='bg-gradient-to-r from-[#000080] to-[#1084d0] h-8 flex items-center pl-2'>
                 <span
-                  className='text-white font-bold rotate-270'
+                  className='text-white font-bold '
                   style={{ textShadow: "none" }}
                 >
-                  워터베어러
+                  시작
                 </span>
               </div>
 
